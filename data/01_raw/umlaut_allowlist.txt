@@ -1,0 +1,41 @@
+# Umlaut allowlist — one term per line, # lines are comments.
+# Terms listed here are replaced with $NE$ before the umlaut filter runs,
+# so sentences containing only these terms are preserved.
+#
+# After running step1_preprocess.py, review data/02_preprocessed/umlaut_triggers.tsv
+# to find candidates to add here.
+
+Val Müstair
+Müstair
+Malögia
+Müller
+Jürg
+Jörg
+Bühler
+Brühl
+Valär
+Trübbach
+Jäger
+Fränzlis
+Fränzi
+Ardüser
+Tödi
+Altstätten
+Schütz
+Löwenberg
+Käthi
+Bütschwil
+Hansjörg
+Hansjürg
+Büchler
+Thöni
+Jörger
+Südostschweiz
+Schläpfer
+Rätia
+Bärtsch
+Neuhäusler
+Brändli
+Grüsch
+Hänny
+Göri

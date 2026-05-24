@@ -14,7 +14,6 @@ parts/
 var/
 sdist/
 develop-eggs/
-.installed.cfg
 lib/
 lib64/
 *.whl
@@ -25,18 +24,12 @@ venv/
 env/
 ENV/
 
-# Distribution / packaging
-.Python
-
 # Unit test / coverage
 htmlcov/
 .coverage
 .coverage.*
 .cache
 .pytest_cache/
-nosetests.xml
-coverage.xml
-*.cover
 
 # Jupyter
 .ipynb_checkpoints
@@ -51,12 +44,9 @@ coverage.xml
 .DS_Store
 .AppleDouble
 .LSOverride
-Icon?
 ._*
 .Spotlight-V100
 .Trashes
-.fseventsd
-.TemporaryItems
 
 # Windows
 Thumbs.db
@@ -65,18 +55,24 @@ Desktop.ini
 $RECYCLE.BIN/
 *.lnk
 
-# Models (large binary files)
-models/*.joblib
-models/*.bin
-models/*.ftz
+# Data — keep directory structure (.gitkeep), ignore content
+data/01_raw/**
+!data/01_raw/**/
+!data/01_raw/**/.gitkeep
+data/02_preprocessed/**
+!data/02_preprocessed/**/
+!data/02_preprocessed/**/.gitkeep
+data/03_splits/**
+!data/03_splits/**/
+!data/03_splits/**/.gitkeep
+
+# Models (large binaries)
+models/**
+!models/.gitkeep
+
+# Results
+results/**
+!results/.gitkeep
 
 # Logs
-logs/
 *.log
-
-# Data (raw and preprocessed — keep structure, not content)
-data/raw_data/
-data/preprocessed_data/
-data/train/
-data/test/
-data/dev/

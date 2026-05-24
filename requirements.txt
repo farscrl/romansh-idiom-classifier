@@ -1,0 +1,5 @@
+# Downloading public data from HuggingFace
+datasets
+
+# Validation report
+matplotlib
