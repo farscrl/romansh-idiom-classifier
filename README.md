@@ -2,6 +2,18 @@
 
 Automatic classification of Romansh text into one of its six regional idioms using classical machine learning (SVM and Logistic Regression) with TF-IDF character and word n-gram features.
 
+## Academic Background
+
+The ideas, methodology, and data pipeline in this project are heavily based on the following Bachelor's thesis:
+
+> **Rumantsch Idiom Identification: Building an Automatic Language Identification System**
+> Charlotte Model — Bachelor's Thesis in Informatics
+> University of Zurich, Faculty of Business, Economics and Informatics
+> Examiner: Prof. Dr. Martin Volk · Supervisor: Dr. Jannis Vamvas
+> Submitted: 06.09.2025
+
+The code and data pipeline in this repository were independently re-implemented from scratch to ensure the project can be published as open source, without any dependency on artefacts that are non-public.
+
 ## Idioms
 
 | Label | Idiom |
