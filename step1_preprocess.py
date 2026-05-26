@@ -19,6 +19,7 @@ from collections import Counter, defaultdict
 from html import escape
 from pathlib import Path
 
+from src.run_log import start_run
 from src.preprocessing import (
     load_fmr,
     load_pledari_grond,
@@ -343,6 +344,8 @@ def cross_source_dedup():
 
 
 def main():
+    start_run("step1_preprocess", artifacts=[UMLAUT_REPORT_PATH, TRIGGER_LOG_PATH])
+
     print("\nPreprocessing FMR...")
     save_by_idiom(load_fmr(), PREPROCESSED_DIR / "fmr")
 

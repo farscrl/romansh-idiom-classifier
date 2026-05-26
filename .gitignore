@@ -75,4 +75,5 @@ results/**
 !results/.gitkeep
 
 # Logs
+logs/
 *.log

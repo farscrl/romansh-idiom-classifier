@@ -3,3 +3,7 @@ datasets
 
 # Validation report
 matplotlib
+
+# Model training and evaluation
+scikit-learn
+scipy

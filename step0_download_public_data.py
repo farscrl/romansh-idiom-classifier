@@ -20,6 +20,8 @@ import json
 from pathlib import Path
 from datasets import load_dataset
 
+from src.run_log import start_run
+
 FMR_DIR = Path("data/01_raw/fmr")
 TEXTBOOKS_DIR = Path("data/01_raw/textbooks")
 THEATER_PLAYS_DIR = Path("data/01_raw/theater-plays")
@@ -86,6 +88,7 @@ def download_canton_laws():
 
 
 if __name__ == "__main__":
+    start_run("step0_download_public_data")
     download_fmr()
     download_textbooks()
     download_theater_plays()

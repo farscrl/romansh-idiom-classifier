@@ -79,7 +79,49 @@ python step6_train_lr.py               # train final LR model with best params, 
 python step7_evaluate.py               # evaluate both models on all test sets, generate HTML report
 ```
 
-> **Tip:** After running step 1, inspect `data/02_preprocessed/` to verify the data before committing to the splits.
+> **Tips:**
+> - After step 1, inspect `data/02_preprocessed/umlaut_report.html` to review removed sentences, and `data/02_preprocessed/umlaut_triggers.tsv` to find candidates for the allowlist.
+> - After step 1z, open `data/02_preprocessed/validation_report.html` to verify the data before committing to the splits.
+> - Steps 3 and 5 (hyperparameter search) each take several hours. All steps write timestamped logs to `logs/<step>/<timestamp>/run.log`, with key output artifacts copied alongside.
+
+---
+
+## Models
+
+Both classifiers use the same TF-IDF feature pipeline:
+
+- **Character n-grams** (`char_wb` analyzer): sequences of characters within word boundaries. Captures spelling patterns and morphological endings that differ between idioms.
+- **Word n-grams**: whole-word unigrams and optionally bigrams. Captures vocabulary differences.
+- Both vectorizers use sublinear TF scaling (`1 + log(tf)`) and 32-bit floats to reduce memory.
+
+The two classifiers are:
+
+| Model | File | Key properties |
+|---|---|---|
+| **SVM** | `models/svm.joblib` | LinearSVC, L1 penalty, squared hinge loss. L1 drives most feature weights to zero, acting as built-in feature selection. |
+| **LR** | `models/lr.joblib` | Logistic Regression, saga solver. Supports L1, L2, and elasticnet penalties. |
+
+### Hyperparameter search (steps 3 and 5)
+
+Following the methodology of Charlotte Model's thesis, the search is performed on a **stratified 20% subset** of the training data (not the full set) to keep compute tractable. Each of the 30 candidate configurations is evaluated with **5-fold stratified cross-validation**, optimising **macro-F1**. The best configuration is written to `models/svm_best_params.json` / `models/lr_best_params.json`.
+
+Search space for both models:
+
+| Parameter | Values searched |
+|---|---|
+| Char n-gram range | (1,3), (1,4), (1,5), (1,6) |
+| Char max features | 100k, 200k |
+| Char min\_df | 1, 2 |
+| Word n-gram range | (1,1), (1,2) |
+| Word max features | 50k, 100k |
+| Word min\_df | 1, 2 |
+| SVM C | log-uniform 0.01–4.0 |
+| LR C | log-uniform 0.01–2.0 |
+| LR penalty | l1, l2, elasticnet |
+
+### Training and evaluation (steps 4, 6, 7)
+
+Steps 4 and 6 train the final models on the **full training set** using the best hyperparameters found in steps 3 and 5 respectively. Step 7 evaluates both models on all test sets and writes a self-contained HTML report to `data/04_evaluation/report.html` with accuracy, macro-F1, per-class precision/recall/F1, and confusion matrix heatmaps.
 
 ---
 

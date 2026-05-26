@@ -22,6 +22,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
+from src.run_log import start_run
+
 # ── constants ──────────────────────────────────────────────────────────────────
 
 SEED = 42
@@ -595,6 +597,8 @@ def build_html(counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, 
 # ── main ───────────────────────────────────────────────────────────────────────
 
 def main():
+    start_run("step1z_validate", artifacts=[REPORT_PATH])
+
     print("Collecting data...")
     counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, char_counts, char_examples, duplicates = collect()
 

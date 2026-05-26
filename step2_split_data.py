@@ -23,6 +23,8 @@ import re
 import random
 from pathlib import Path
 
+from src.run_log import start_run
+
 SEED = 42
 FMR_TEST_RATIO = 0.2
 TEXTBOOKS_TEST_RATIO = 0.2
@@ -115,6 +117,8 @@ def split_rtr_balanced(samples: list[tuple[str, str]], dev_per_idiom: int, test_
 
 
 def main():
+    start_run("step2_split_data")
+
     train, dev, test_a, test_b, test_c, test_d = [], [], [], [], [], []
 
     # --- FMR ---
