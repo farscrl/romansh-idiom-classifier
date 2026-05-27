@@ -56,8 +56,10 @@ TEST_SETS = {
 }
 
 MODELS = {
-    "SVM": MODELS_DIR / "svm.joblib",
-    "LR": MODELS_DIR / "lr.joblib",
+    "SVM":      MODELS_DIR / "svm.joblib",
+    "SVM-lite": MODELS_DIR / "svm_lite.joblib",
+    "LR":       MODELS_DIR / "lr.joblib",
+    "LR-lite":  MODELS_DIR / "lr_lite.joblib",
 }
 
 

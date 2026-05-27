@@ -2,7 +2,9 @@
 Step 6: Train final Logistic Regression model using best hyperparameters from step 5.
 
 Reads models/lr_best_params.json, trains a TF-IDF + LogisticRegression pipeline on
-the full training set, and saves the fitted model to models/lr.pkl.
+the full training set, saves models/lr.joblib, and also trains a lite variant
+(10k char / 5k word vocab) saved to models/lr_lite.joblib.
+The lite model is exported to JSON for browser inference.
 """
 
 import json
@@ -11,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 from src.run_log import start_run
+from src.model_export import export_pipeline
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -20,6 +23,10 @@ SPLITS_DIR = Path("data/03_splits")
 MODELS_DIR = Path("models")
 PARAMS_PATH = MODELS_DIR / "lr_best_params.json"
 MODEL_PATH = MODELS_DIR / "lr.joblib"
+MODEL_PATH_LITE = MODELS_DIR / "lr_lite.joblib"
+
+CHAR_LITE = 10_000
+WORD_LITE = 5_000
 
 SEED = 42
 
@@ -37,7 +44,7 @@ def load_split(path: Path) -> tuple[list[str], list[str]]:
 
 def main():
     MODELS_DIR.mkdir(exist_ok=True)
-    start_run("step6_train_lr", artifacts=[MODEL_PATH])
+    start_run("step6_train_lr", artifacts=[MODEL_PATH, MODEL_PATH_LITE])
 
     if not PARAMS_PATH.exists():
         raise FileNotFoundError(f"{PARAMS_PATH} not found — run step5_optimize_lr.py first.")
@@ -115,6 +122,73 @@ def main():
     joblib.dump(pipeline, MODEL_PATH)
     size_mb = MODEL_PATH.stat().st_size / 1_048_576
     print(f"\n  Model saved → {MODEL_PATH} ({size_mb:.1f} MB)")
+
+    # ------------------------------------------------------------------ #
+    # Phase 2 — export full LR to JSON                                    #
+    # ------------------------------------------------------------------ #
+    print("\nExporting full LR...")
+    export_pipeline(pipeline, MODELS_DIR / "lr_export.json")
+
+    # ------------------------------------------------------------------ #
+    # Phase 3 — train lite LR (10k char / 5k word vocab)                 #
+    # ------------------------------------------------------------------ #
+    print(f"\nTraining lite LR (char={CHAR_LITE:,} / word={WORD_LITE:,} max features)...")
+    t_lite = time.time()
+
+    char_tfidf_lite = TfidfVectorizer(
+        analyzer="char_wb", sublinear_tf=True, dtype=np.float32,
+        ngram_range=tuple(params["features__char__ngram_range"]),
+        max_features=CHAR_LITE,
+        min_df=params["features__char__min_df"],
+    )
+    word_tfidf_lite = TfidfVectorizer(
+        analyzer="word", sublinear_tf=True, dtype=np.float32,
+        ngram_range=tuple(params["features__word__ngram_range"]),
+        max_features=WORD_LITE,
+        min_df=params["features__word__min_df"],
+    )
+    clf_lite = LogisticRegression(
+        C=params["clf__C"],
+        solver="lbfgs",
+        max_iter=3000,
+        random_state=SEED,
+    )
+    pipeline_lite = Pipeline([
+        ("features", FeatureUnion([
+            ("char", char_tfidf_lite),
+            ("word", word_tfidf_lite),
+        ])),
+        ("clf", clf_lite),
+    ])
+
+    print("  Step 1/2: building TF-IDF feature matrices...")
+    feat_union_lite = pipeline_lite.named_steps["features"]
+    X_lite = feat_union_lite.fit_transform(train_texts, train_labels)
+    t_vec_lite = time.time() - t_lite
+    char_vocab_lite = len(feat_union_lite.transformer_list[0][1].vocabulary_)
+    word_vocab_lite = len(feat_union_lite.transformer_list[1][1].vocabulary_)
+    density_lite = X_lite.nnz / (X_lite.shape[0] * X_lite.shape[1])
+    print(f"  Vectorization done in {t_vec_lite:.1f}s")
+    print(f"    char features: {char_vocab_lite:,}")
+    print(f"    word features: {word_vocab_lite:,}")
+    print(f"    matrix shape:  {X_lite.shape[0]:,} × {X_lite.shape[1]:,}  (density {density_lite:.4%})")
+
+    print("  Step 2/2: fitting LogisticRegression (lbfgs solver)...")
+    t_clf_lite = time.time()
+    pipeline_lite.named_steps["clf"].fit(X_lite, train_labels)
+    elapsed_clf_lite = time.time() - t_clf_lite
+    elapsed_lite = time.time() - t_lite
+    print(f"  Classifier done in {elapsed_clf_lite:.1f}s  (total {elapsed_lite:.1f}s)")
+
+    joblib.dump(pipeline_lite, MODEL_PATH_LITE)
+    size_lite_mb = MODEL_PATH_LITE.stat().st_size / 1_048_576
+    print(f"\n  Model saved → {MODEL_PATH_LITE} ({size_lite_mb:.1f} MB)")
+
+    # ------------------------------------------------------------------ #
+    # Phase 4 — export lite LR to JSON                                    #
+    # ------------------------------------------------------------------ #
+    print("\nExporting lite LR...")
+    export_pipeline(pipeline_lite, MODELS_DIR / "lr_lite_export.json")
 
 
 if __name__ == "__main__":
