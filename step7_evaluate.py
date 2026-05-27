@@ -272,7 +272,7 @@ def build_summary_table(results: dict, model_names: list[str]) -> str:
 
 def build_html(results: dict, top_features_html: dict) -> str:
     """results: {test_key: {model_name: {acc, f1, table_html, cm_b64, n_samples, classes}}}"""
-    body_parts = [f"<style>{CSS}</style>", "<h1>Romansh Idiom Identification — Evaluation Report</h1>"]
+    body_parts = [f"<style>{CSS}</style>", "<h1>Romansh Idiom Classifier — Evaluation Report</h1>"]
 
     model_names = list(MODELS.keys())
     body_parts.append("<h2>Summary</h2>")
@@ -305,7 +305,7 @@ def build_html(results: dict, top_features_html: dict) -> str:
             body_parts.append(r["table_html"])
             body_parts.append("</div>")
 
-    return "<!DOCTYPE html><html><head><meta charset='utf-8'><title>RII Evaluation</title></head><body>" + "".join(body_parts) + "</body></html>"
+    return "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Romansh Idiom Classifier — Evaluation</title></head><body>" + "".join(body_parts) + "</body></html>"
 
 
 def main():

@@ -1,4 +1,4 @@
-# Romansh Idiom Identification (RII)
+# Romansh Idiom Classifier
 
 Automatic classification of Romansh text into one of its six regional idioms using classical machine learning (SVM and Logistic Regression) with TF-IDF character and word n-gram features.
 
@@ -73,10 +73,10 @@ python step1_preprocess.py             # clean and normalize text → data/02_pr
 python step1z_validate.py             # inspect preprocessed data, generate HTML report
 python step2_split_data.py             # create train/dev/test splits → data/03_splits/
 python step3_optimize_svm.py           # find best SVM hyperparameters via randomized search
-python step4_train_svm.py              # train final SVM model with best params, save to models/
+python step4_train_svm.py              # train SVM (full + lite), export JSON for browser
 python step5_optimize_lr.py            # find best LR hyperparameters via randomized search
-python step6_train_lr.py               # train final LR model with best params, save to models/
-python step7_evaluate.py               # evaluate both models on all test sets, generate HTML report
+python step6_train_lr.py               # train LR (full + lite), export JSON for browser
+python step7_evaluate.py               # evaluate all four models, generate HTML report
 ```
 
 > **Tips:**
@@ -114,12 +114,14 @@ Both classifiers use the same TF-IDF feature pipeline:
 - **Word n-grams**: whole-word unigrams and optionally bigrams. Captures vocabulary differences.
 - Both vectorizers use sublinear TF scaling (`1 + log(tf)`) and 32-bit floats to reduce memory.
 
-The two classifiers are:
+Four model variants are trained and evaluated:
 
-| Model | File | Key properties |
-|---|---|---|
-| **SVM** | `models/svm.joblib` | LinearSVC, L1 penalty, squared hinge loss. L1 drives most feature weights to zero, acting as built-in feature selection. |
-| **LR** | `models/lr.joblib` | Logistic Regression, saga solver. Supports L1, L2, and elasticnet penalties. |
+| Model | File | Vocab | Key properties |
+|---|---|---|---|
+| **SVM** | `models/svm.joblib` | 100k char + 100k word | LinearSVC, L1 penalty. Sparse weights (~10–20% non-zero). |
+| **SVM-lite** | `models/svm_lite.joblib` | 10k char + 5k word | Same as SVM, smaller vocab. Exported to `svm_lite_export.json` for browser use. |
+| **LR** | `models/lr.joblib` | 100k char + 50k word | Logistic Regression, L2 penalty, lbfgs solver. |
+| **LR-lite** | `models/lr_lite.joblib` | 10k char + 5k word | Same as LR, smaller vocab. Exported to `lr_lite_export.json` for browser use. |
 
 ### Hyperparameter search (steps 3 and 5)
 
