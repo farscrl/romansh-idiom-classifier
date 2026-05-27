@@ -86,12 +86,12 @@ python step7_evaluate.py               # evaluate all four models, generate HTML
 
 ---
 
-## npm Package
+## Packages
 
-A browser-ready TypeScript package is published to npm:
+### npm (browser / Node.js)
 
 ```bash
-pnpm add @farscrl/romansh-idiom-classifier
+npm add @farscrl/romansh-idiom-classifier
 ```
 
 ```typescript
@@ -102,7 +102,23 @@ const idiom = classifier.predict("Enstagl ha el sbaglià la via e s'ha pers en l
 // → "rm-sursilv"
 ```
 
-The LR-lite model is bundled directly in the package — no server, no separate model file needed. The package is a pure TypeScript reimplementation of the linear inference pipeline. See [`packages/romansh-idiom-classifier-npm/`](packages/romansh-idiom-classifier-npm/) for full documentation.
+The LR-lite model is bundled directly — no server or separate model file needed. See [`packages/romansh-idiom-classifier-npm/`](packages/romansh-idiom-classifier-npm/) for full documentation.
+
+### pip (Python)
+
+```bash
+pip install romansh-idiom-classifier
+```
+
+```python
+from romansh_idiom_classifier import RomanshIdiomClassifier
+
+classifier = RomanshIdiomClassifier()          # full LR model (best overall accuracy)
+idiom = classifier.predict("Enstagl ha el sbaglià la via e s'ha pers en la cità.")
+# → "rm-sursilv"
+```
+
+All four trained models are bundled. No scikit-learn required at runtime — pure Python + numpy inference. See [`packages/romansh-idiom-classifier-py/`](packages/romansh-idiom-classifier-py/) for full documentation.
 
 ---
 

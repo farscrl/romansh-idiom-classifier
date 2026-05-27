@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "romansh-idiom-classifier"
+version = "1.0.0"
+description = "Romansh idiom classifier — Sursilvan, Sutsilvan, Surmiran, Puter, Vallader, Rumantsch Grischun"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24"]
+keywords = ["romansh", "rumantsch", "language-identification", "nlp"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/romansh_idiom_classifier"]
+
+[tool.hatch.build.targets.wheel.shared-data]

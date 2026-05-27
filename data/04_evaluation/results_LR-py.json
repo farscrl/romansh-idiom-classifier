@@ -1,0 +1,105 @@
+{
+  "model": "lr",
+  "source": "python",
+  "timestamp": "2026-05-27T13:25:43.834266Z",
+  "test_sets": {
+    "test_a": {
+      "label": "Test A \u2014 news (FMR)",
+      "n_samples": 2616,
+      "accuracy": 0.983563,
+      "macro_f1": 0.976016,
+      "per_class": {
+        "rm-puter": {
+          "f1": 0.971609
+        },
+        "rm-rumgr": {
+          "f1": 0.970414
+        },
+        "rm-surmiran": {
+          "f1": 0.985692
+        },
+        "rm-sursilv": {
+          "f1": 0.994624
+        },
+        "rm-sutsilv": {
+          "f1": 0.955882
+        },
+        "rm-vallader": {
+          "f1": 0.977876
+        }
+      }
+    },
+    "test_b": {
+      "label": "Test B \u2014 speech transcripts (RTR)",
+      "n_samples": 1200,
+      "accuracy": 0.985,
+      "macro_f1": 0.984969,
+      "per_class": {
+        "rm-puter": {
+          "f1": 0.969543
+        },
+        "rm-rumgr": {
+          "f1": 0.985149
+        },
+        "rm-surmiran": {
+          "f1": 0.992443
+        },
+        "rm-sursilv": {
+          "f1": 0.995025
+        },
+        "rm-sutsilv": {
+          "f1": 0.997506
+        },
+        "rm-vallader": {
+          "f1": 0.970149
+        }
+      }
+    },
+    "test_c": {
+      "label": "Test C \u2014 schoolbooks (Textbooks)",
+      "n_samples": 49690,
+      "accuracy": 0.918233,
+      "macro_f1": 0.929062,
+      "per_class": {
+        "rm-puter": {
+          "f1": 0.943189
+        },
+        "rm-surmiran": {
+          "f1": 0.881411
+        },
+        "rm-sursilv": {
+          "f1": 0.930954
+        },
+        "rm-sutsilv": {
+          "f1": 0.95584
+        },
+        "rm-vallader": {
+          "f1": 0.933916
+        }
+      }
+    },
+    "test_d": {
+      "label": "Test D \u2014 proprietary (out-of-domain)",
+      "n_samples": 9568,
+      "accuracy": 0.920987,
+      "macro_f1": 0.848742,
+      "per_class": {
+        "rm-puter": {
+          "f1": 0.753354
+        },
+        "rm-surmiran": {
+          "f1": 0.957816
+        },
+        "rm-sursilv": {
+          "f1": 0.959454
+        },
+        "rm-sutsilv": {
+          "f1": 0.705882
+        },
+        "rm-vallader": {
+          "f1": 0.867203
+        }
+      }
+    }
+  }
+}

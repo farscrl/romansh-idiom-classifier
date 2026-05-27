@@ -1,0 +1,5 @@
+src/romansh_idiom_classifier/models/*.json
+dist/
+*.egg-info/
+__pycache__/
+.venv/
