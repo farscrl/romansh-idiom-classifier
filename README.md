@@ -86,6 +86,26 @@ python step7_evaluate.py               # evaluate both models on all test sets, 
 
 ---
 
+## npm Package
+
+A browser-ready TypeScript package is published to npm:
+
+```bash
+pnpm add @farscrl/romansh-idiom-classifier
+```
+
+```typescript
+import { RomanshIdiomClassifier } from "@farscrl/romansh-idiom-classifier";
+
+const classifier = new RomanshIdiomClassifier();
+const idiom = classifier.predict("Enstagl ha el sbaglià la via e s'ha pers en la cità.");
+// → "rm-sursilv"
+```
+
+The LR-lite model is bundled directly in the package — no server, no separate model file needed. The package is a pure TypeScript reimplementation of the linear inference pipeline. See [`packages/romansh-idiom-classifier-npm/`](packages/romansh-idiom-classifier-npm/) for full documentation.
+
+---
+
 ## Models
 
 Both classifiers use the same TF-IDF feature pipeline:

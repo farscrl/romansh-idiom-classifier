@@ -1,0 +1,43 @@
+{
+  "name": "@farscrl/romansh-idiom-classifier",
+  "version": "1.0.0",
+  "description": "Browser-side Romansh idiom classifier (Sursilvan, Sutsilvan, Surmiran, Puter, Vallader, Rumantsch Grischun)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node scripts/embed-model.js && tsc",
+    "build:demo": "node scripts/embed-model.js && vite build",
+    "prepublishOnly": "pnpm run build",
+    "verify": "tsx scripts/verify.ts --model"
+  },
+  "keywords": [
+    "romansh",
+    "rumantsch",
+    "language-identification",
+    "nlp"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.4+sha256.cadfd9e6c9fcc2cb76fe7c0779a5250b632898aea5f53d833a73690c77a778d9",
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.3",
+    "typescript": "^5.4.0",
+    "vite": "^8.0.14",
+    "vite-plugin-singlefile": "^2.3.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
