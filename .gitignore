@@ -66,10 +66,6 @@ data/03_splits/**
 !data/03_splits/**/
 !data/03_splits/**/.gitkeep
 
-# Models (large binaries)
-models/**
-!models/.gitkeep
-
 # Results
 results/**
 !results/.gitkeep
