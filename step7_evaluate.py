@@ -14,8 +14,10 @@ Metrics reported per model × test set:
 
 import base64
 import io
+import json
 import time
 from collections import Counter
+from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
 
@@ -195,11 +197,15 @@ body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 1100px;
 h1 { border-bottom: 2px solid #333; padding-bottom: .4rem; }
 h2 { margin-top: 2.5rem; color: #1a4f8a; }
 h3 { margin-top: 1.5rem; color: #444; }
-.summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
-.summary-card { border: 1px solid #ccc; border-radius: 6px; padding: 1rem; background: #f9f9f9; }
-.summary-card .model { font-size: .85rem; color: #666; }
-.summary-card .score { font-size: 1.8rem; font-weight: bold; color: #1a4f8a; }
-.summary-card .label { font-size: .9rem; }
+table.summary { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+table.summary th, table.summary td { padding: .45rem .9rem; border: 1px solid #ddd; text-align: right; white-space: nowrap; }
+table.summary th { background: #e8eef6; text-align: center; }
+table.summary td:first-child, table.summary td:nth-child(2) { text-align: left; }
+table.summary th:first-child, table.summary th:nth-child(2) { text-align: left; }
+table.summary tr.group-sep td { border-top: 2px solid #aac; }
+table.summary td.best  { background: #d4edda; font-weight: 600; }
+table.summary td.worst { background: #f8d7da; }
+table.summary td.na    { color: #aaa; text-align: center; }
 table.metrics { border-collapse: collapse; width: 100%; margin: .8rem 0; }
 table.metrics th, table.metrics td { padding: .4rem .8rem; border: 1px solid #ddd; text-align: right; }
 table.metrics th { background: #e8eef6; }
@@ -218,29 +224,59 @@ code { font-family: monospace; background: #f4f4f4; padding: 1px 3px; border-rad
 """
 
 
+def build_summary_table(results: dict, model_names: list[str]) -> str:
+    """Comparison table: rows = test set × metric, cols = models. Best/worst highlighted."""
+    col_header = "".join(f"<th>{escape(m)}</th>" for m in model_names)
+    header = f"<thead><tr><th>Test set</th><th>Metric</th>{col_header}</tr></thead>"
+
+    rows = []
+    for i, (tkey, (tlabel, _)) in enumerate(TEST_SETS.items()):
+        for metric_key, metric_label in [("acc", "Accuracy"), ("f1", "Macro F1")]:
+            values = {}
+            for mname in model_names:
+                if tkey in results and mname in results[tkey]:
+                    values[mname] = results[tkey][mname][metric_key]
+
+            defined = [v for v in values.values()]
+            best_val  = max(defined) if defined else None
+            worst_val = min(defined) if defined else None
+            # Only mark best/worst when there's meaningful spread
+            spread = (best_val - worst_val) if best_val is not None and worst_val is not None else 0
+
+            cells = []
+            for mname in model_names:
+                if mname not in values:
+                    cells.append("<td class='na'>—</td>")
+                    continue
+                v = values[mname]
+                fmt = f"{v:.2%}" if metric_key == "acc" else f"{v:.4f}"
+                css = ""
+                if spread > 0:
+                    if v == best_val:
+                        css = " class='best'"
+                    elif v == worst_val:
+                        css = " class='worst'"
+                cells.append(f"<td{css}>{fmt}</td>")
+
+            sep = " class='group-sep'" if metric_key == "acc" and i > 0 else ""
+            test_cell = f"<td rowspan='2'>{escape(tlabel)}</td>" if metric_key == "acc" else ""
+            rows.append(f"<tr{sep}>{test_cell}<td>{metric_label}</td>{''.join(cells)}</tr>")
+
+    return (
+        "<table class='summary'>"
+        + header
+        + "<tbody>" + "".join(rows) + "</tbody>"
+        + "</table>"
+    )
+
+
 def build_html(results: dict, top_features_html: dict) -> str:
     """results: {test_key: {model_name: {acc, f1, table_html, cm_b64, n_samples, classes}}}"""
     body_parts = [f"<style>{CSS}</style>", "<h1>Romansh Idiom Identification — Evaluation Report</h1>"]
 
-    # Summary table: rows = test sets, cols = models
     model_names = list(MODELS.keys())
     body_parts.append("<h2>Summary</h2>")
-    body_parts.append("<div class='summary-grid'>")
-    for tkey, (tlabel, _) in TEST_SETS.items():
-        if tkey not in results:
-            continue
-        for mname in model_names:
-            if mname not in results[tkey]:
-                continue
-            r = results[tkey][mname]
-            body_parts.append(
-                f"<div class='summary-card'>"
-                f"<div class='model'>{escape(mname)} · {escape(tlabel)}</div>"
-                f"<div class='score'>{r['acc']:.1%}</div>"
-                f"<div class='label'>accuracy &nbsp;·&nbsp; macro F1 {r['f1']:.3f} &nbsp;·&nbsp; n={r['n_samples']:,}</div>"
-                f"</div>"
-            )
-    body_parts.append("</div>")
+    body_parts.append(build_summary_table(results, model_names))
 
     # Top features per class (one section per model, independent of test sets)
     body_parts.append("<h2>Top 10 Features per Class</h2>")
@@ -312,7 +348,7 @@ def main():
             t_pred = time.time()
             preds = model.predict(texts)
             acc = accuracy_score(labels, preds)
-            f1 = f1_score(labels, preds, average="macro", zero_division=0)
+            f1 = f1_score(labels, preds, average="macro", labels=classes, zero_division=0)
             print(f"  [{mname}] done in {time.time()-t_pred:.1f}s")
             print(f"  [{mname}] accuracy={acc:.4f}  macro-F1={f1:.4f}")
             print(f"  [{mname}] per-class F1:")
@@ -324,6 +360,9 @@ def main():
             cm_b64 = plot_confusion_matrix(labels, preds, classes)
             table_html = per_class_table(labels, preds, classes)
 
+            report_dict = classification_report(
+                labels, preds, labels=classes, output_dict=True, zero_division=0
+            )
             results[tkey][mname] = {
                 "acc": acc,
                 "f1": f1,
@@ -331,7 +370,39 @@ def main():
                 "classes": classes,
                 "cm_b64": cm_b64,
                 "table_html": table_html,
+                "per_class": {
+                    cls: {
+                        "f1":        round(report_dict[cls]["f1-score"], 6),
+                        "precision": round(report_dict[cls]["precision"], 6),
+                        "recall":    round(report_dict[cls]["recall"], 6),
+                        "support":   int(report_dict[cls]["support"]),
+                    }
+                    for cls in classes
+                },
             }
+
+    # Save per-model JSON results
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    for mname in loaded_models:
+        payload = {
+            "model":    mname,
+            "source":   "python",
+            "timestamp": timestamp,
+            "test_sets": {
+                tkey: {
+                    "label":     tlabel,
+                    "n_samples": results[tkey][mname]["n_samples"],
+                    "accuracy":  round(results[tkey][mname]["acc"], 6),
+                    "macro_f1":  round(results[tkey][mname]["f1"], 6),
+                    "per_class": results[tkey][mname]["per_class"],
+                }
+                for tkey, (tlabel, _) in TEST_SETS.items()
+                if tkey in results and mname in results[tkey]
+            },
+        }
+        json_path = EVAL_DIR / f"results_{mname}.json"
+        json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        print(f"  Results saved → {json_path}")
 
     print("\nExtracting top features per class...")
     top_features_html = {}
