@@ -1,0 +1,171 @@
+{
+  "model": "LR",
+  "source": "python",
+  "timestamp": "2026-05-27T10:40:44Z",
+  "test_sets": {
+    "test_a": {
+      "label": "Test A \u2014 news (FMR)",
+      "n_samples": 2616,
+      "accuracy": 0.98318,
+      "macro_f1": 0.974568,
+      "per_class": {
+        "rm-sursilv": {
+          "f1": 0.994624,
+          "precision": 0.993733,
+          "recall": 0.995516,
+          "support": 1115
+        },
+        "rm-sutsilv": {
+          "f1": 0.948148,
+          "precision": 0.969697,
+          "recall": 0.927536,
+          "support": 69
+        },
+        "rm-surmiran": {
+          "f1": 0.985692,
+          "precision": 0.996785,
+          "recall": 0.974843,
+          "support": 318
+        },
+        "rm-puter": {
+          "f1": 0.971609,
+          "precision": 0.987179,
+          "recall": 0.956522,
+          "support": 161
+        },
+        "rm-vallader": {
+          "f1": 0.977876,
+          "precision": 0.986607,
+          "recall": 0.969298,
+          "support": 456
+        },
+        "rm-rumgr": {
+          "f1": 0.969458,
+          "precision": 0.949807,
+          "recall": 0.98994,
+          "support": 497
+        }
+      }
+    },
+    "test_b": {
+      "label": "Test B \u2014 speech transcripts (RTR)",
+      "n_samples": 1200,
+      "accuracy": 0.9825,
+      "macro_f1": 0.982474,
+      "per_class": {
+        "rm-sursilv": {
+          "f1": 0.997506,
+          "precision": 0.995025,
+          "recall": 1.0,
+          "support": 200
+        },
+        "rm-sutsilv": {
+          "f1": 0.997506,
+          "precision": 0.995025,
+          "recall": 1.0,
+          "support": 200
+        },
+        "rm-surmiran": {
+          "f1": 0.987342,
+          "precision": 1.0,
+          "recall": 0.975,
+          "support": 200
+        },
+        "rm-puter": {
+          "f1": 0.966921,
+          "precision": 0.984456,
+          "recall": 0.95,
+          "support": 200
+        },
+        "rm-vallader": {
+          "f1": 0.965174,
+          "precision": 0.960396,
+          "recall": 0.97,
+          "support": 200
+        },
+        "rm-rumgr": {
+          "f1": 0.980392,
+          "precision": 0.961538,
+          "recall": 1.0,
+          "support": 200
+        }
+      }
+    },
+    "test_c": {
+      "label": "Test C \u2014 schoolbooks (Textbooks)",
+      "n_samples": 49690,
+      "accuracy": 0.920749,
+      "macro_f1": 0.933053,
+      "per_class": {
+        "rm-sursilv": {
+          "f1": 0.932738,
+          "precision": 0.925439,
+          "recall": 0.940154,
+          "support": 11446
+        },
+        "rm-sutsilv": {
+          "f1": 0.957709,
+          "precision": 0.974037,
+          "recall": 0.94192,
+          "support": 11949
+        },
+        "rm-surmiran": {
+          "f1": 0.887987,
+          "precision": 0.948308,
+          "recall": 0.83488,
+          "support": 6680
+        },
+        "rm-puter": {
+          "f1": 0.947552,
+          "precision": 0.964815,
+          "recall": 0.930896,
+          "support": 9927
+        },
+        "rm-vallader": {
+          "f1": 0.939281,
+          "precision": 0.958822,
+          "recall": 0.92052,
+          "support": 9688
+        }
+      }
+    },
+    "test_d": {
+      "label": "Test D \u2014 proprietary (out-of-domain)",
+      "n_samples": 9568,
+      "accuracy": 0.920882,
+      "macro_f1": 0.857407,
+      "per_class": {
+        "rm-sursilv": {
+          "f1": 0.959089,
+          "precision": 0.971261,
+          "recall": 0.947218,
+          "support": 4888
+        },
+        "rm-sutsilv": {
+          "f1": 0.75,
+          "precision": 0.818182,
+          "recall": 0.692308,
+          "support": 26
+        },
+        "rm-surmiran": {
+          "f1": 0.958082,
+          "precision": 0.946198,
+          "recall": 0.970268,
+          "support": 3027
+        },
+        "rm-puter": {
+          "f1": 0.754404,
+          "precision": 0.935733,
+          "recall": 0.631944,
+          "support": 576
+        },
+        "rm-vallader": {
+          "f1": 0.865462,
+          "precision": 0.916047,
+          "recall": 0.820171,
+          "support": 1051
+        }
+      }
+    }
+  }
+}
