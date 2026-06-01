@@ -18,9 +18,10 @@ from pathlib import Path
 
 import numpy as np
 from scipy.stats import loguniform
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import clone
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
 from sklearn.model_selection import ParameterSampler, StratifiedKFold, cross_val_score, train_test_split
 from sklearn.pipeline import FeatureUnion, Pipeline
 
@@ -135,6 +136,19 @@ def main():
     with open(PARAMS_PATH, "w", encoding="utf-8") as f:
         json.dump(best, f, indent=2)
     print(f"\nSaved best params → {PARAMS_PATH}")
+
+    # ── Dev-set sanity check ────────────────────────────────────────────────
+    # Train with best params on the same 20% search subset, then score on the
+    # held-out dev set. A similar score to CV confirms the CV estimate is reliable.
+    print("\nDev-set sanity check...")
+    dev_texts, dev_labels = load_split(SPLITS_DIR / "dev/dev.tsv")
+    print(f"  dev set: {len(dev_texts):,} samples")
+    model = clone(pipeline)
+    model.set_params(**best_params)
+    model.fit(search_texts, search_labels)
+    dev_f1 = f1_score(dev_labels, model.predict(dev_texts), average="macro")
+    print(f"\n  CV best score (20% subset, {CV_FOLDS}-fold):  {best_score:.4f}")
+    print(f"  Dev macro-F1 (same subset → dev set):   {dev_f1:.4f}")
 
 
 if __name__ == "__main__":
