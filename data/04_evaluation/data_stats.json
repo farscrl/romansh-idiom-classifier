@@ -1,0 +1,683 @@
+{
+  "table_a_sources": [
+    {
+      "key": "fmr",
+      "name": "FMR (La Quotidiana)",
+      "evaluation_only": false,
+      "idioms": {
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 808,
+          "tokens": 446435,
+          "avg_tokens": 552.5
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 2485,
+          "tokens": 1384934,
+          "avg_tokens": 557.3
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 1594,
+          "tokens": 984682,
+          "avg_tokens": 617.7
+        },
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 5575,
+          "tokens": 3111758,
+          "avg_tokens": 558.2
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 345,
+          "tokens": 190408,
+          "avg_tokens": 551.9
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 2281,
+          "tokens": 1301289,
+          "avg_tokens": 570.5
+        }
+      },
+      "total": {
+        "samples": 13088,
+        "tokens": 7419506,
+        "avg_tokens": 566.9
+      }
+    },
+    {
+      "key": "rtr-transcripts",
+      "name": "RTR Transcripts",
+      "evaluation_only": false,
+      "idioms": {
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 5965,
+          "tokens": 220550,
+          "avg_tokens": 37.0
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 4349,
+          "tokens": 227638,
+          "avg_tokens": 52.3
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 7154,
+          "tokens": 242954,
+          "avg_tokens": 34.0
+        },
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 6951,
+          "tokens": 347914,
+          "avg_tokens": 50.1
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 2869,
+          "tokens": 132365,
+          "avg_tokens": 46.1
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 5769,
+          "tokens": 272983,
+          "avg_tokens": 47.3
+        }
+      },
+      "total": {
+        "samples": 33057,
+        "tokens": 1444404,
+        "avg_tokens": 43.7
+      }
+    },
+    {
+      "key": "pledari-grond",
+      "name": "PG / dicziunaris ladins",
+      "evaluation_only": false,
+      "idioms": {
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 41545,
+          "tokens": 638769,
+          "avg_tokens": 15.4
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 167167,
+          "tokens": 968255,
+          "avg_tokens": 5.8
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 36701,
+          "tokens": 493255,
+          "avg_tokens": 13.4
+        },
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 87703,
+          "tokens": 960557,
+          "avg_tokens": 11.0
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 31564,
+          "tokens": 619660,
+          "avg_tokens": 19.6
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 51195,
+          "tokens": 670668,
+          "avg_tokens": 13.1
+        }
+      },
+      "total": {
+        "samples": 415875,
+        "tokens": 4351164,
+        "avg_tokens": 10.5
+      }
+    },
+    {
+      "key": "textbooks",
+      "name": "Mediomatix Textbooks",
+      "evaluation_only": false,
+      "idioms": {
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 49638,
+          "tokens": 775785,
+          "avg_tokens": 15.6
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 33402,
+          "tokens": 409589,
+          "avg_tokens": 12.3
+        },
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 57231,
+          "tokens": 766287,
+          "avg_tokens": 13.4
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 59745,
+          "tokens": 813067,
+          "avg_tokens": 13.6
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 48440,
+          "tokens": 768114,
+          "avg_tokens": 15.9
+        }
+      },
+      "total": {
+        "samples": 248456,
+        "tokens": 3532842,
+        "avg_tokens": 14.2
+      }
+    },
+    {
+      "key": "theater-plays",
+      "name": "Theater Plays",
+      "evaluation_only": false,
+      "idioms": {
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 19,
+          "tokens": 4011,
+          "avg_tokens": 211.1
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 17,
+          "tokens": 7034,
+          "avg_tokens": 413.8
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 1304,
+          "tokens": 322167,
+          "avg_tokens": 247.1
+        },
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 1412,
+          "tokens": 404401,
+          "avg_tokens": 286.4
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 420,
+          "tokens": 121394,
+          "avg_tokens": 289.0
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 669,
+          "tokens": 181978,
+          "avg_tokens": 272.0
+        }
+      },
+      "total": {
+        "samples": 3841,
+        "tokens": 1040985,
+        "avg_tokens": 271.0
+      }
+    },
+    {
+      "key": "canton-laws",
+      "name": "Canton Laws",
+      "evaluation_only": false,
+      "idioms": {
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 9040,
+          "tokens": 524905,
+          "avg_tokens": 58.1
+        }
+      },
+      "total": {
+        "samples": 9040,
+        "tokens": 524905,
+        "avg_tokens": 58.1
+      }
+    },
+    {
+      "key": "proprietary-data",
+      "name": "RTR Telesguard Notes",
+      "evaluation_only": true,
+      "idioms": {
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 576,
+          "tokens": 147633,
+          "avg_tokens": 256.3
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 3027,
+          "tokens": 227261,
+          "avg_tokens": 75.1
+        },
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 4888,
+          "tokens": 535840,
+          "avg_tokens": 109.6
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 26,
+          "tokens": 5551,
+          "avg_tokens": 213.5
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 1051,
+          "tokens": 353487,
+          "avg_tokens": 336.3
+        }
+      },
+      "total": {
+        "samples": 9568,
+        "tokens": 1269772,
+        "avg_tokens": 132.7
+      }
+    }
+  ],
+  "table_b_by_idiom": {
+    "idioms": {
+      "rm-sursilv": {
+        "name": "Sursilvan",
+        "by_source": {
+          "fmr": 5575,
+          "rtr-transcripts": 6951,
+          "pledari-grond": 87703,
+          "textbooks": 57231,
+          "theater-plays": 1412,
+          "canton-laws": 0
+        },
+        "total_samples": 158872,
+        "total_tokens": 5590917,
+        "avg_tokens": 35.2
+      },
+      "rm-sutsilv": {
+        "name": "Sutsilvan",
+        "by_source": {
+          "fmr": 345,
+          "rtr-transcripts": 2869,
+          "pledari-grond": 31564,
+          "textbooks": 59745,
+          "theater-plays": 420,
+          "canton-laws": 0
+        },
+        "total_samples": 94943,
+        "total_tokens": 1876894,
+        "avg_tokens": 19.8
+      },
+      "rm-surmiran": {
+        "name": "Surmiran",
+        "by_source": {
+          "fmr": 1594,
+          "rtr-transcripts": 7154,
+          "pledari-grond": 36701,
+          "textbooks": 33402,
+          "theater-plays": 1304,
+          "canton-laws": 0
+        },
+        "total_samples": 80155,
+        "total_tokens": 2452647,
+        "avg_tokens": 30.6
+      },
+      "rm-puter": {
+        "name": "Puter",
+        "by_source": {
+          "fmr": 808,
+          "rtr-transcripts": 5965,
+          "pledari-grond": 41545,
+          "textbooks": 49638,
+          "theater-plays": 19,
+          "canton-laws": 0
+        },
+        "total_samples": 97975,
+        "total_tokens": 2085550,
+        "avg_tokens": 21.3
+      },
+      "rm-vallader": {
+        "name": "Vallader",
+        "by_source": {
+          "fmr": 2281,
+          "rtr-transcripts": 5769,
+          "pledari-grond": 51195,
+          "textbooks": 48440,
+          "theater-plays": 669,
+          "canton-laws": 0
+        },
+        "total_samples": 108354,
+        "total_tokens": 3195032,
+        "avg_tokens": 29.5
+      },
+      "rm-rumgr": {
+        "name": "Rumantsch Grischun",
+        "by_source": {
+          "fmr": 2485,
+          "rtr-transcripts": 4349,
+          "pledari-grond": 167167,
+          "textbooks": 0,
+          "theater-plays": 17,
+          "canton-laws": 9040
+        },
+        "total_samples": 183058,
+        "total_tokens": 3112766,
+        "avg_tokens": 17.0
+      }
+    },
+    "total": {
+      "by_source": {
+        "fmr": 13088,
+        "rtr-transcripts": 33057,
+        "pledari-grond": 415875,
+        "textbooks": 248456,
+        "theater-plays": 3841,
+        "canton-laws": 9040
+      },
+      "total_samples": 723357,
+      "total_tokens": 18313806,
+      "avg_tokens": 25.3
+    }
+  },
+  "table_c_splits": [
+    {
+      "key": "train",
+      "name": "Train",
+      "idioms": {
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 145909,
+          "tokens": 4844432,
+          "avg_tokens": 33.2
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 82521,
+          "tokens": 1699322,
+          "avg_tokens": 20.6
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 72747,
+          "tokens": 2181005,
+          "avg_tokens": 30.0
+        },
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 87483,
+          "tokens": 1879250,
+          "avg_tokens": 21.5
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 97809,
+          "tokens": 2839624,
+          "avg_tokens": 29.0
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 182158,
+          "tokens": 2808710,
+          "avg_tokens": 15.4
+        }
+      },
+      "total": {
+        "samples": 668627,
+        "tokens": 16252343,
+        "avg_tokens": 24.3
+      }
+    },
+    {
+      "key": "dev",
+      "name": "Dev",
+      "idioms": {
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 200,
+          "tokens": 10174,
+          "avg_tokens": 50.9
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 200,
+          "tokens": 9211,
+          "avg_tokens": 46.1
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 200,
+          "tokens": 6512,
+          "avg_tokens": 32.6
+        },
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 200,
+          "tokens": 7232,
+          "avg_tokens": 36.2
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 200,
+          "tokens": 9762,
+          "avg_tokens": 48.8
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 200,
+          "tokens": 10657,
+          "avg_tokens": 53.3
+        }
+      },
+      "total": {
+        "samples": 1200,
+        "tokens": 53548,
+        "avg_tokens": 44.6
+      }
+    },
+    {
+      "key": "test_a",
+      "name": "Test A",
+      "idioms": {
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 1115,
+          "tokens": 620188,
+          "avg_tokens": 556.2
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 69,
+          "tokens": 34781,
+          "avg_tokens": 504.1
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 318,
+          "tokens": 197359,
+          "avg_tokens": 620.6
+        },
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 161,
+          "tokens": 91876,
+          "avg_tokens": 570.7
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 456,
+          "tokens": 249276,
+          "avg_tokens": 546.7
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 497,
+          "tokens": 284272,
+          "avg_tokens": 572.0
+        }
+      },
+      "total": {
+        "samples": 2616,
+        "tokens": 1477752,
+        "avg_tokens": 564.9
+      }
+    },
+    {
+      "key": "test_b",
+      "name": "Test B",
+      "idioms": {
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 200,
+          "tokens": 10090,
+          "avg_tokens": 50.5
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 200,
+          "tokens": 9452,
+          "avg_tokens": 47.3
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 200,
+          "tokens": 6525,
+          "avg_tokens": 32.6
+        },
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 200,
+          "tokens": 7007,
+          "avg_tokens": 35.0
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 200,
+          "tokens": 9491,
+          "avg_tokens": 47.5
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 200,
+          "tokens": 10155,
+          "avg_tokens": 50.8
+        }
+      },
+      "total": {
+        "samples": 1200,
+        "tokens": 52720,
+        "avg_tokens": 43.9
+      }
+    },
+    {
+      "key": "test_c",
+      "name": "Test C",
+      "idioms": {
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 11446,
+          "tokens": 152309,
+          "avg_tokens": 13.3
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 11949,
+          "tokens": 164424,
+          "avg_tokens": 13.8
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 6680,
+          "tokens": 82091,
+          "avg_tokens": 12.3
+        },
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 9927,
+          "tokens": 152583,
+          "avg_tokens": 15.4
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 9688,
+          "tokens": 153919,
+          "avg_tokens": 15.9
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 0,
+          "tokens": 0,
+          "avg_tokens": 0.0
+        }
+      },
+      "total": {
+        "samples": 49690,
+        "tokens": 705326,
+        "avg_tokens": 14.2
+      }
+    },
+    {
+      "key": "test_d",
+      "name": "Test D",
+      "idioms": {
+        "rm-sursilv": {
+          "name": "Sursilvan",
+          "samples": 4888,
+          "tokens": 535840,
+          "avg_tokens": 109.6
+        },
+        "rm-sutsilv": {
+          "name": "Sutsilvan",
+          "samples": 26,
+          "tokens": 5551,
+          "avg_tokens": 213.5
+        },
+        "rm-surmiran": {
+          "name": "Surmiran",
+          "samples": 3027,
+          "tokens": 227261,
+          "avg_tokens": 75.1
+        },
+        "rm-puter": {
+          "name": "Puter",
+          "samples": 576,
+          "tokens": 147633,
+          "avg_tokens": 256.3
+        },
+        "rm-vallader": {
+          "name": "Vallader",
+          "samples": 1051,
+          "tokens": 353487,
+          "avg_tokens": 336.3
+        },
+        "rm-rumgr": {
+          "name": "Rumantsch Grischun",
+          "samples": 0,
+          "tokens": 0,
+          "avg_tokens": 0.0
+        }
+      },
+      "total": {
+        "samples": 9568,
+        "tokens": 1269772,
+        "avg_tokens": 132.7
+      }
+    }
+  ]
+}
