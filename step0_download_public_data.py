@@ -9,6 +9,7 @@ Sources downloaded:
   - Textbooks:                 ZurichNLP/mediomatix-raw, all 5 idiom subsets
   - Theater Plays:             ZurichNLP/romansh_theater_plays
   - Canton Laws:               ZurichNLP/romansh-canton-laws (rm-rumgr only)
+  - Wikipedia (de/fr/it/en):   wikimedia/wikipedia, streamed paragraphs
 
 Sources that must be obtained manually (see README.md):
   - Pledari Grond:     export JSON files from pledarigrond.ch (+ permission for Puter/Vallader)
@@ -26,6 +27,12 @@ FMR_DIR = Path("data/01_raw/fmr")
 TEXTBOOKS_DIR = Path("data/01_raw/textbooks")
 THEATER_PLAYS_DIR = Path("data/01_raw/theater-plays")
 CANTON_LAWS_DIR = Path("data/01_raw/canton-laws")
+WIKIPEDIA_DIR = Path("data/01_raw/wikipedia")
+
+WIKIPEDIA_LANGS = ["de", "fr", "it", "en"]
+WIKIPEDIA_DUMP = "20231101"          # stable HuggingFace dump date
+WIKIPEDIA_SAMPLES_PER_LANG = 100_000 # paragraphs per language
+WIKIPEDIA_MIN_PARA_LEN = 50          # skip section headers / stubs
 
 TEXTBOOK_IDIOMS = [
     "rm-sursilv",
@@ -87,10 +94,35 @@ def download_canton_laws():
     print(f"  Saved {len(dataset)} rows to {out}")
 
 
+def download_wikipedia():
+    print(f"Downloading Wikipedia ({', '.join(WIKIPEDIA_LANGS)}, dump {WIKIPEDIA_DUMP})...")
+    for lang in WIKIPEDIA_LANGS:
+        lang_dir = WIKIPEDIA_DIR / lang
+        lang_dir.mkdir(parents=True, exist_ok=True)
+        out = lang_dir / "data.jsonl"
+        config = f"{WIKIPEDIA_DUMP}.{lang}"
+        print(f"  {lang}: streaming {config}...")
+        dataset = load_dataset("wikimedia/wikipedia", config, split="train", streaming=True)
+        count = 0
+        with open(out, "w", encoding="utf-8") as f:
+            for article in dataset:
+                for para in article.get("text", "").split("\n"):
+                    para = para.strip()
+                    if len(para) >= WIKIPEDIA_MIN_PARA_LEN:
+                        f.write(json.dumps({"text": para, "lang": lang}, ensure_ascii=False) + "\n")
+                        count += 1
+                        if count >= WIKIPEDIA_SAMPLES_PER_LANG:
+                            break
+                if count >= WIKIPEDIA_SAMPLES_PER_LANG:
+                    break
+        print(f"    Saved {count:,} paragraphs → {out}")
+
+
 if __name__ == "__main__":
     start_run("step0_download_public_data")
     download_fmr()
     download_textbooks()
     download_theater_plays()
     download_canton_laws()
+    download_wikipedia()
     print("\nDone. Add the remaining data sources manually (see README.md).")

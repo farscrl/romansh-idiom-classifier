@@ -1,7 +1,7 @@
 """
 Step 2: Read preprocessed data and create train/dev/test splits.
 
-Split allocation:
+Split allocation (Romansh):
   FMR             → train (80%) + test-a (20%, unbalanced)
   Pledari Grond   → train (all)
   RTR Transcripts → dev (balanced) + test-b (balanced) + train (remainder)
@@ -10,19 +10,30 @@ Split allocation:
   Canton Laws     → train (all)
   Proprietary     → test-d (all, out-of-domain)
 
+With --multilingual, Wikipedia de/fr/it/en data is added:
+  Wikipedia       → train (80%) + dev (10%) + test-e (10%), per language
+
+A splits-meta.json file is written to data/03_splits/ indicating whether the
+splits include multilingual data, so downstream steps can adapt accordingly.
+
 Output:
   data/03_splits/train/train.tsv
   data/03_splits/dev/dev.tsv
-  data/03_splits/test/test_a.tsv
-  data/03_splits/test/test_b.tsv
-  data/03_splits/test/test_c.tsv
-  data/03_splits/test/test_d.tsv
+  data/03_splits/test/test_a.tsv  (Romansh, in-domain)
+  data/03_splits/test/test_b.tsv  (Romansh, in-domain)
+  data/03_splits/test/test_c.tsv  (Romansh, in-domain)
+  data/03_splits/test/test_d.tsv  (Romansh, out-of-domain)
+  data/03_splits/test/test_e.tsv  (Wikipedia de/fr/it/en — only with --multilingual)
+  data/03_splits/splits-meta.json
 """
 
+import argparse
+import json
 import re
 import random
 from pathlib import Path
 
+from src.preprocessing import WIKIPEDIA_LANGS
 from src.run_log import start_run
 
 SEED = 42
@@ -30,6 +41,10 @@ FMR_TEST_RATIO = 0.2
 TEXTBOOKS_TEST_RATIO = 0.2
 DEV_PER_IDIOM = 200
 TEST_B_PER_IDIOM = 200
+WIKI_DEV_RATIO = 0.10
+WIKI_TEST_E_RATIO = 0.10
+
+ROMANSH_IDIOMS = ["rm-sursilv", "rm-sutsilv", "rm-surmiran", "rm-puter", "rm-vallader", "rm-rumgr"]
 
 PREPROCESSED_DIR = Path("data/02_preprocessed")
 SPLITS_DIR = Path("data/03_splits")
@@ -96,6 +111,46 @@ def split_by_ratio(samples: list[tuple[str, str]], test_ratio: float):
     return train, test
 
 
+def load_preprocessed_wiki(langs: list[str]) -> list[tuple[str, str]]:
+    """Read {lang}.tsv files from data/02_preprocessed/wikipedia/."""
+    samples = []
+    source_dir = PREPROCESSED_DIR / "wikipedia"
+    if not source_dir.exists():
+        print("  [Wikipedia] Not found in preprocessed — skipping.")
+        return []
+    for lang in langs:
+        path = source_dir / f"{lang}.tsv"
+        if not path.exists():
+            print(f"  [Wikipedia/{lang}] Not found — skipping.")
+            continue
+        count = 0
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                text = line.rstrip("\n")
+                if text:
+                    samples.append((lang, text))
+                    count += 1
+        print(f"  [Wikipedia/{lang}] {count:,} samples")
+    return samples
+
+
+def split_wikipedia(samples: list[tuple[str, str]], dev_ratio: float, test_ratio: float):
+    """Per-language random 3-way split into (train, dev, test)."""
+    by_lang: dict[str, list] = {}
+    for label, text in samples:
+        by_lang.setdefault(label, []).append((label, text))
+    train, dev, test = [], [], []
+    for lang_samples in by_lang.values():
+        random.shuffle(lang_samples)
+        n = len(lang_samples)
+        n_test = int(n * test_ratio)
+        n_dev = int(n * dev_ratio)
+        test.extend(lang_samples[:n_test])
+        dev.extend(lang_samples[n_test:n_test + n_dev])
+        train.extend(lang_samples[n_test + n_dev:])
+    return train, dev, test
+
+
 def split_rtr_balanced(samples: list[tuple[str, str]], dev_per_idiom: int, test_b_per_idiom: int):
     """Carve out balanced dev and test-b sets; remainder goes to train."""
     by_idiom: dict[str, list] = {}
@@ -116,10 +171,26 @@ def split_rtr_balanced(samples: list[tuple[str, str]], dev_per_idiom: int, test_
     return dev, test_b, train
 
 
+def write_metadata(multilingual: bool, languages: list[str]):
+    meta = {"multilingual": multilingual, "languages": languages}
+    path = SPLITS_DIR / "splits-meta.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2)
+    print(f"  Metadata → {path}")
+
+
 def main():
+    parser = argparse.ArgumentParser(description="Create train/dev/test splits.")
+    parser.add_argument(
+        "--multilingual", action="store_true",
+        help="Include Wikipedia de/fr/it/en data and produce test-e.",
+    )
+    args = parser.parse_args()
+
     start_run("step2_split_data")
 
-    train, dev, test_a, test_b, test_c, test_d = [], [], [], [], [], []
+    train, dev, test_a, test_b, test_c, test_d, test_e = [], [], [], [], [], [], []
 
     # --- FMR ---
     print("\nLoading FMR from preprocessed...")
@@ -173,6 +244,16 @@ def main():
     test_d.extend(prop)
     print(f"  → {len(prop):,} test-d")
 
+    # --- Wikipedia (multilingual only) ---
+    if args.multilingual:
+        print("\nLoading Wikipedia (multilingual) from preprocessed...")
+        wiki = load_preprocessed_wiki(WIKIPEDIA_LANGS)
+        wiki_train, wiki_dev, wiki_test_e = split_wikipedia(wiki, WIKI_DEV_RATIO, WIKI_TEST_E_RATIO)
+        train.extend(wiki_train)
+        dev.extend(wiki_dev)
+        test_e.extend(wiki_test_e)
+        print(f"  → {len(wiki_train):,} train / {len(wiki_dev):,} dev / {len(wiki_test_e):,} test-e")
+
     # --- Shuffle train ---
     random.shuffle(train)
 
@@ -184,6 +265,13 @@ def main():
     save_tsv(test_b, SPLITS_DIR / "test/test_b.tsv")
     save_tsv(test_c, SPLITS_DIR / "test/test_c.tsv")
     save_tsv(test_d, SPLITS_DIR / "test/test_d.tsv")
+    if args.multilingual:
+        save_tsv(test_e, SPLITS_DIR / "test/test_e.tsv")
+
+    languages = list(ROMANSH_IDIOMS)
+    if args.multilingual:
+        languages.extend(WIKIPEDIA_LANGS)
+    write_metadata(args.multilingual, languages)
 
     print("\nDone.")
     print(f"  train:  {len(train):>8,}")
@@ -192,6 +280,10 @@ def main():
     print(f"  test-b: {len(test_b):>8,}")
     print(f"  test-c: {len(test_c):>8,}")
     print(f"  test-d: {len(test_d):>8,}")
+    if args.multilingual:
+        print(f"  test-e: {len(test_e):>8,}  (Wikipedia de/fr/it/en)")
+    mode = "multilingual" if args.multilingual else "Romansh-only"
+    print(f"\n  Mode: {mode}")
 
 
 if __name__ == "__main__":

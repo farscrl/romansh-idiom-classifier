@@ -1,6 +1,6 @@
 # Romansh Idiom Classifier
 
-Automatic classification of Romansh text into one of its six regional idioms using classical machine learning (SVM and Logistic Regression) with TF-IDF character and word n-gram features.
+Automatic classification of Romansh text into one of its six regional idioms using classical machine learning (SVM and Logistic Regression) with TF-IDF character and word n-gram features. An optional multilingual mode extends the classifier to also identify German, French, Italian, and English.
 
 ## Academic Background
 
@@ -14,7 +14,9 @@ The ideas, methodology, and data pipeline in this project are heavily based on t
 
 The code and data pipeline in this repository were independently re-implemented from scratch to ensure the project can be published as open source, without any dependency on artefacts that are non-public.
 
-## Idioms
+## Labels
+
+### Romansh idioms (all modes)
 
 | Label | Idiom |
 |---|---|
@@ -24,6 +26,15 @@ The code and data pipeline in this repository were independently re-implemented 
 | `rm-puter` | Puter |
 | `rm-vallader` | Vallader |
 | `rm-rumgr` | Rumantsch Grischun |
+
+### Additional languages (multilingual mode only)
+
+| Label | Language | Training source |
+|---|---|---|
+| `de` | German | Wikipedia |
+| `fr` | French | Wikipedia |
+| `it` | Italian | Wikipedia |
+| `en` | English | Wikipedia |
 
 ## Setup
 
@@ -70,7 +81,7 @@ Once all data is in place, run the steps in order:
 ```bash
 python step0_download_public_data.py   # download publicly available data from HuggingFace
 python step1_preprocess.py             # clean and normalize text → data/02_preprocessed/
-python step1z_validate.py             # inspect preprocessed data, generate HTML report
+python step1z_validate.py              # inspect preprocessed data, generate HTML report
 python step2_split_data.py             # create train/dev/test splits → data/03_splits/
 python step3_optimize_svm.py           # find best SVM hyperparameters via randomized search
 python step4_train_svm.py              # train SVM (full + lite), export JSON for browser
@@ -79,10 +90,20 @@ python step6_train_lr.py               # train LR (full + lite), export JSON for
 python step7_evaluate.py               # evaluate all four models, generate HTML report
 ```
 
+**Multilingual mode** (adds German, French, Italian, English):
+
+```bash
+python step2_split_data.py --multilingual   # adds Wikipedia data, produces test-e
+# then re-run steps 3–7 as usual
+```
+
+Step 0 always downloads Wikipedia data for de/fr/it/en regardless of mode. The `--multilingual` flag in step 2 decides whether to include it in the splits. All downstream steps (3–7) can read `data/03_splits/splits-meta.json` to know which labels and test sets are active.
+
 > **Tips:**
 > - After step 1, inspect `data/02_preprocessed/umlaut_report.html` to review removed sentences, and `data/02_preprocessed/umlaut_triggers.tsv` to find candidates for the allowlist.
 > - After step 1z, open `data/02_preprocessed/validation_report.html` to verify the data before committing to the splits.
-> - Steps 3 and 5 (hyperparameter search) each take several hours. All steps write timestamped logs to `logs/<step>/<timestamp>/run.log`, with key output artifacts copied alongside.
+> - Steps 3 and 5 (hyperparameter search) each take several hours and print a dev-set sanity check at the end — CV score vs. dev macro-F1 — to confirm the CV estimate is reliable.
+> - All steps write timestamped logs to `logs/<step>/<timestamp>/run.log`, with key output artifacts copied alongside.
 
 ---
 
@@ -248,6 +269,18 @@ Cantonal laws of the Canton of Grisons (Graubünden), extracted from [gr-lex.gr.
 
 ---
 
+### Wikipedia (de/fr/it/en) — *publicly available*
+
+Paragraphs from Wikipedia articles in German, French, Italian, and English, used for multilingual mode only. Downloaded as a stream from HuggingFace — no manual steps required.
+
+- **Source:** [wikimedia/wikipedia](https://huggingface.co/datasets/wikimedia/wikipedia) (dump `20231101`, one config per language)
+- **License:** CC BY-SA 4.0
+- **Downloaded automatically** by `step0_download_public_data.py` into `data/01_raw/wikipedia/{lang}/`
+- **Samples:** 100,000 paragraphs per language (configurable via `WIKIPEDIA_SAMPLES_PER_LANG` in step 0)
+- **Languages:** `de`, `fr`, `it`, `en`
+
+---
+
 ### Textbooks — *publicly available*
 
 Texts from Romansh schoolbooks (years 2–9), from the *Mediomatix* project.
@@ -275,6 +308,7 @@ Produced by `step2_split_data.py` from `data/02_preprocessed/` into `data/03_spl
 | Textbooks | 80% of source | Unbalanced |
 | Theater Plays | 100% of source | Unbalanced |
 | Canton Laws | 100% of source | rm-rumgr only |
+| Wikipedia de/fr/it/en *(--multilingual)* | 80% per language | Approximately balanced |
 
 The training set is shuffled after assembly. It additionally receives the training-only text cleanup (lowercasing, punctuation removal, placeholder removal — see [Data Cleanup](#data-cleanup) below).
 
@@ -283,8 +317,9 @@ The training set is shuffled after assembly. It additionally receives the traini
 | Source | Allocation | Balance |
 |---|---|---|
 | RTR Transcripts | 200 samples per idiom | **Balanced** (exactly 200 × 6 idioms) |
+| Wikipedia de/fr/it/en *(--multilingual)* | 10% per language | Approximately balanced |
 
-Used for hyperparameter tuning and model selection during development. Balanced across idioms to give equal weight to each class. Drawn from the same domain as test-b (speech transcripts).
+Used for the dev-set sanity check at the end of steps 3 and 5 (CV score vs. held-out dev macro-F1). Romansh rows are drawn from the same domain as test-b (speech transcripts).
 
 ### `test/test_a.tsv` — Test set A: news (FMR, in-domain)
 
@@ -317,6 +352,22 @@ In-domain test set: same source as the textbook portion of training. Tests gener
 | Proprietary data | 100% of source | Depends on available data |
 
 Out-of-domain test set. None of this data is used for training, making it the most realistic measure of how the model performs on unseen text types. Only present if `data/01_raw/proprietary-data/` contains `.tsv` files; otherwise this file is empty.
+
+### `test/test_e.tsv` — Test set E: Wikipedia (multilingual mode only)
+
+| Source | Allocation | Balance |
+|---|---|---|
+| Wikipedia de/fr/it/en | 10% per language | Approximately balanced |
+
+Held-out Wikipedia paragraphs for the four non-Romansh languages. Only written when running `step2_split_data.py --multilingual`. Since both training and test data come from Wikipedia for these languages, test E measures in-domain performance on the new classes — the challenge remains the separation of Romansh idioms, measured by test sets A–D.
+
+### `splits-meta.json`
+
+Written to `data/03_splits/splits-meta.json` by every run of step 2. Downstream steps (3–7) read this file to know which labels are active:
+
+```json
+{"multilingual": false, "languages": ["rm-sursilv", "rm-sutsilv", "rm-surmiran", "rm-puter", "rm-vallader", "rm-rumgr"]}
+```
 
 ---
 

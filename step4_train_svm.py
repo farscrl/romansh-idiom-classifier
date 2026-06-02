@@ -15,6 +15,7 @@ import numpy as np
 
 from src.run_log import start_run
 from src.model_export import export_pipeline
+from src.splits import load_splits_meta
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
@@ -46,6 +47,10 @@ def load_split(path: Path) -> tuple[list[str], list[str]]:
 def main():
     MODELS_DIR.mkdir(exist_ok=True)
     start_run("step4_train_svm", artifacts=[MODEL_PATH, MODEL_PATH_LITE])
+
+    meta = load_splits_meta()
+    mode = "multilingual" if meta["multilingual"] else "Romansh-only"
+    print(f"Mode: {mode} ({len(meta['languages'])} classes: {', '.join(meta['languages'])})")
 
     if not PARAMS_PATH.exists():
         raise FileNotFoundError(f"{PARAMS_PATH} not found — run step3_optimize_svm.py first.")

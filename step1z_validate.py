@@ -35,6 +35,8 @@ REPORT_PATH = PREPROCESSED_DIR / "validation_report.html"
 SOURCES = ["fmr", "pledari-grond", "rtr-transcripts", "textbooks", "theater-plays", "canton-laws", "proprietary-data"]
 IDIOMS = ["rm-sursilv", "rm-sutsilv", "rm-surmiran", "rm-puter", "rm-vallader", "rm-rumgr"]
 DEDUP_SOURCES = ["fmr", "rtr-transcripts", "textbooks", "theater-plays", "canton-laws", "proprietary-data"]
+WIKI_SOURCE = "wikipedia"
+WIKI_LANGS = ["de", "fr", "it", "en"]
 
 SHORT_THRESHOLD = 10
 DEDUP_MIN_LEN = 40
@@ -139,6 +141,55 @@ def collect():
     }
 
     return counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, char_counts, char_examples, duplicates
+
+
+def collect_wiki() -> dict | None:
+    """Collect stats for Wikipedia multilingual data. Returns None if not present."""
+    wiki_dir = PREPROCESSED_DIR / WIKI_SOURCE
+    if not wiki_dir.exists():
+        return None
+
+    counts: Counter = Counter()
+    lengths: dict[str, list] = {lang: [] for lang in WIKI_LANGS}
+    sample_pools: dict[str, list] = {lang: [] for lang in WIKI_LANGS}
+    entity_hits: dict = defaultdict(list)
+    susp_hits: dict = defaultdict(list)
+
+    found_any = False
+    for lang in WIKI_LANGS:
+        path = wiki_dir / f"{lang}.tsv"
+        if not path.exists():
+            continue
+        found_any = True
+        print(f"  Scanning wikipedia/{lang}...", flush=True)
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                text = line.rstrip("\n")
+                if not text:
+                    continue
+                counts[lang] += 1
+                lengths[lang].append(len(text))
+                snippet = text[:100]
+                for m in HTML_ENTITY_RE.finditer(text):
+                    ent = m.group()
+                    if len(entity_hits[ent]) < MAX_EXAMPLES:
+                        entity_hits[ent].append((lang, snippet))
+                for c in set(text):
+                    cp = ord(c)
+                    if cp in SUSPICIOUS_CHARS and len(susp_hits[cp]) < MAX_EXAMPLES:
+                        susp_hits[cp].append((lang, snippet))
+                if len(sample_pools[lang]) < 50:
+                    sample_pools[lang].append(text)
+
+    if not found_any:
+        return None
+
+    samples = {
+        lang: random.sample(pool, min(SAMPLE_N, len(pool)))
+        for lang, pool in sample_pools.items()
+    }
+    return {"counts": counts, "lengths": lengths, "samples": samples,
+            "entity_hits": entity_hits, "susp_hits": susp_hits}
 
 # ── chart helpers ──────────────────────────────────────────────────────────────
 
@@ -563,10 +614,136 @@ def section_char_inventory(char_counts, char_examples) -> str:
         f"<div class='card'>{note}{''.join(idiom_blocks)}</div>"
     )
 
+def _chart_lengths_labeled(label_lengths: dict[str, list], title: str) -> str:
+    """Generic box-plot chart for any {label: [char_lengths]} dict."""
+    active = [(label, data) for label, data in label_lengths.items() if data]
+    if not active:
+        return ""
+    labels = [a[0] for a in active]
+    bxp_data = [b for b in (_bxp_stats(a[1]) for a in active) if b is not None]
+    colors = ["#e63946", "#457b9d", "#2a9d8f", "#e9c46a", "#f4a261", "#6d6875", "#264653", "#a8dadc"]
+    fig, ax = plt.subplots(figsize=(10, max(3, len(labels) * 0.7 + 1.5)))
+    bp = ax.bxp(bxp_data, vert=False, patch_artist=True,
+                medianprops=dict(color="black", linewidth=2),
+                flierprops=dict(marker=".", markersize=2, alpha=0.4))
+    for patch, color in zip(bp["boxes"], colors):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.75)
+    ax.set_yticklabels(labels)
+    ax.set_xlabel("Text length (characters)")
+    ax.set_title(title)
+    ax.set_xlim(0, 2000)
+    fig.tight_layout()
+    return fig_to_b64(fig)
+
+
+def section_wiki(wiki_data: dict) -> str:
+    counts = wiki_data["counts"]
+    lengths = wiki_data["lengths"]
+    samples = wiki_data["samples"]
+    entity_hits = wiki_data["entity_hits"]
+    susp_hits = wiki_data["susp_hits"]
+
+    # Counts table
+    total = sum(counts.values())
+    count_rows = "".join(
+        f"<tr><td>{lang}</td><td class='num'>{counts.get(lang, 0):,}</td></tr>"
+        for lang in WIKI_LANGS if counts.get(lang, 0) > 0
+    )
+    count_rows += f"<tr class='grand'><td><b>Total</b></td><td class='num grand'><b>{total:,}</b></td></tr>"
+    counts_table = (
+        "<table><thead><tr><th>Language</th><th>Samples</th></tr></thead>"
+        f"<tbody>{count_rows}</tbody></table>"
+    )
+
+    # Length stats
+    len_rows = "".join(_len_stats_row(lang, lengths[lang]) for lang in WIKI_LANGS if lengths[lang])
+    len_table = _LEN_TABLE_HEADER + len_rows + "</tbody></table>"
+    chart_b64 = _chart_lengths_labeled(
+        {lang: lengths[lang] for lang in WIKI_LANGS},
+        "Text length distribution per language (x clipped at 2 000)",
+    )
+    chart = img_tag(chart_b64, "length distribution per language") if chart_b64 else ""
+
+    # Artifacts
+    artifact_parts = []
+    if entity_hits:
+        rows = []
+        for ent in sorted(entity_hits):
+            hits = entity_hits[ent]
+            items = "".join(
+                f"<li>{escape(lang)}: <span class='snip'>{escape(snip)}</span></li>"
+                for lang, snip in hits
+            )
+            rows.append(
+                f"<tr><td><span class='mono'>{escape(ent)}</span></td>"
+                f"<td class='num'>{len(hits)}</td>"
+                f"<td><details><summary>{len(hits)} example(s)</summary>"
+                f"<ol class='examples'>{items}</ol></details></td></tr>"
+            )
+        artifact_parts.append(
+            "<h3>HTML Entities</h3>"
+            "<table><thead><tr><th>Entity</th><th>Occurrences</th><th>Examples</th></tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody></table>"
+        )
+    else:
+        artifact_parts.append("<p class='ok'>✓ No HTML entities found.</p>")
+
+    if susp_hits:
+        rows = []
+        for cp in sorted(susp_hits):
+            hits = susp_hits[cp]
+            items = "".join(
+                f"<li>{escape(lang)}: <span class='snip'>{escape(snip)}</span></li>"
+                for lang, snip in hits
+            )
+            rows.append(
+                f"<tr><td class='mono'>U+{cp:04X}</td>"
+                f"<td>{escape(SUSPICIOUS_CHARS[cp])}</td>"
+                f"<td class='num'>{len(hits)}</td>"
+                f"<td><details><summary>{len(hits)} example(s)</summary>"
+                f"<ol class='examples'>{items}</ol></details></td></tr>"
+            )
+        artifact_parts.append(
+            "<h3>Suspicious Unicode Characters</h3>"
+            "<table><thead><tr><th>Codepoint</th><th>Name</th><th>Occurrences</th><th>Examples</th></tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody></table>"
+        )
+    else:
+        artifact_parts.append("<p class='ok'>✓ No suspicious Unicode characters found.</p>")
+
+    # Samples
+    sample_blocks = []
+    for lang in WIKI_LANGS:
+        pool = samples.get(lang, [])
+        if not pool:
+            continue
+        items = "".join(f"<li>{escape(t)}</li>" for t in pool)
+        sample_blocks.append(
+            f"<details><summary>{lang}</summary><ol class='examples'>{items}</ol></details>"
+        )
+
+    return (
+        f"<h2 id='s-wiki'>7. Wikipedia (de / fr / it / en)</h2>"
+        f"<div class='card'>"
+        f"<p style='margin-bottom:8px'>Data used in multilingual mode "
+        f"(<code>step2_split_data.py --multilingual</code>).</p>"
+        f"<h3>Sample Counts</h3>{counts_table}"
+        f"<h3 style='margin-top:20px'>Text Length Distribution</h3>"
+        f"{_BOXPLOT_DESC}{len_table}{chart}"
+        f"<h3 style='margin-top:20px'>Encoding Artifacts</h3>{''.join(artifact_parts)}"
+        f"<h3 style='margin-top:20px'>Random Samples</h3>"
+        f"<p style='margin-bottom:8px'>{SAMPLE_N} random texts per language.</p>"
+        f"{''.join(sample_blocks)}"
+        f"</div>"
+    )
+
+
 # ── assembly ───────────────────────────────────────────────────────────────────
 
-def build_html(counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, char_counts, char_examples, duplicates) -> str:
-    toc = """<div class='card' style='display:inline-block;min-width:260px;margin-bottom:24px'>
+def build_html(counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, char_counts, char_examples, duplicates, wiki_data) -> str:
+    wiki_toc = "<li><a href='#s-wiki'>Wikipedia (de / fr / it / en)</a></li>" if wiki_data else ""
+    toc = f"""<div class='card' style='display:inline-block;min-width:260px;margin-bottom:24px'>
 <b>Contents</b>
 <ol style='margin:8px 0 0;padding-left:22px;line-height:2'>
 <li><a href='#s-counts'>Sample Counts</a></li>
@@ -575,16 +752,20 @@ def build_html(counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, 
 <li><a href='#s-artifacts'>Encoding Artifacts</a></li>
 <li><a href='#s-samples'>Random Samples</a></li>
 <li><a href='#s-chars'>Character Inventory per Idiom</a></li>
+{wiki_toc}
 </ol></div>"""
 
-    body = "".join([
+    sections = [
         section_counts(counts),
         section_lengths(lengths, idiom_lengths),
         section_duplicates(duplicates),
         section_artifacts(entity_hits, susp_hits),
         section_samples(samples),
         section_char_inventory(char_counts, char_examples),
-    ])
+    ]
+    if wiki_data:
+        sections.append(section_wiki(wiki_data))
+    body = "".join(sections)
 
     return (
         f"<!DOCTYPE html><html lang='en'><head>"
@@ -599,11 +780,16 @@ def build_html(counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, 
 def main():
     start_run("step1z_validate", artifacts=[REPORT_PATH])
 
-    print("Collecting data...")
+    print("Collecting Romansh data...")
     counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, char_counts, char_examples, duplicates = collect()
 
+    print("Collecting Wikipedia data...")
+    wiki_data = collect_wiki()
+    if wiki_data is None:
+        print("  Wikipedia data not found — skipping section 7.")
+
     print("Building report...")
-    html = build_html(counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, char_counts, char_examples, duplicates)
+    html = build_html(counts, lengths, idiom_lengths, entity_hits, susp_hits, samples, char_counts, char_examples, duplicates, wiki_data)
 
     REPORT_PATH.write_text(html, encoding="utf-8")
     size_kb = REPORT_PATH.stat().st_size // 1024

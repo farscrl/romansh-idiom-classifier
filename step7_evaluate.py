@@ -1,9 +1,9 @@
 """
 Step 7: Evaluate SVM and Logistic Regression models on all test sets.
 
-Loads models/svm.joblib and models/lr.joblib, runs predictions on test_a through test_d
-(skipping any that are empty or missing), and generates an HTML report at
-data/04_evaluation/report.html.
+Loads models/svm.joblib and models/lr.joblib, runs predictions on all available
+test sets (test_a through test_d always; test_e when splits-meta.json indicates
+multilingual mode), and generates an HTML report at data/04_evaluation/report.html.
 
 Metrics reported per model × test set:
   - Accuracy
@@ -22,6 +22,7 @@ from html import escape
 from pathlib import Path
 
 from src.run_log import start_run
+from src.splits import load_splits_meta
 import joblib
 import matplotlib
 import matplotlib.pyplot as plt
@@ -40,21 +41,27 @@ SPLITS_DIR = Path("data/03_splits")
 EVAL_DIR = Path("data/04_evaluation")
 REPORT_PATH = EVAL_DIR / "report.html"
 
-IDIOMS = ["rm-sursilv", "rm-sutsilv", "rm-surmiran", "rm-puter", "rm-vallader", "rm-rumgr"]
-IDIOM_SHORT = {
+LABEL_SHORT = {
     "rm-sursilv": "Sursilv",
     "rm-sutsilv": "Sutsilv",
     "rm-surmiran": "Surmiran",
-    "rm-puter": "Puter",
+    "rm-puter":    "Puter",
     "rm-vallader": "Vallader",
-    "rm-rumgr": "RumGr",
+    "rm-rumgr":    "RumGr",
+    "de": "German",
+    "fr": "French",
+    "it": "Italian",
+    "en": "English",
 }
 
-TEST_SETS = {
+BASE_TEST_SETS = {
     "test_a": ("Test A — news (FMR)", SPLITS_DIR / "test/test_a.tsv"),
     "test_b": ("Test B — speech transcripts (RTR)", SPLITS_DIR / "test/test_b.tsv"),
     "test_c": ("Test C — schoolbooks (Textbooks)", SPLITS_DIR / "test/test_c.tsv"),
     "test_d": ("Test D — proprietary (out-of-domain)", SPLITS_DIR / "test/test_d.tsv"),
+}
+MULTILINGUAL_TEST_SETS = {
+    "test_e": ("Test E — Wikipedia (de/fr/it/en)", SPLITS_DIR / "test/test_e.tsv"),
 }
 
 MODELS = {
@@ -93,7 +100,7 @@ def plot_confusion_matrix(y_true, y_pred, classes: list[str]) -> str:
     im = ax.imshow(cm_norm, cmap="Blues", vmin=0, vmax=1)
     plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
 
-    short = [IDIOM_SHORT.get(c, c) for c in classes]
+    short = [LABEL_SHORT.get(c, c) for c in classes]
     ax.set_xticks(range(len(classes)))
     ax.set_yticks(range(len(classes)))
     ax.set_xticklabels(short, rotation=45, ha="right", fontsize=9)
@@ -119,7 +126,7 @@ def per_class_table(y_true, y_pred, classes: list[str]) -> str:
     rows = []
     for cls in classes:
         d = report.get(cls, {})
-        short = IDIOM_SHORT.get(cls, cls)
+        short = LABEL_SHORT.get(cls, cls)
         rows.append(
             f"<tr>"
             f"<td>{escape(short)}</td>"
@@ -172,7 +179,7 @@ def top_features_table(model, n: int = 10) -> str:
             f' <span class="feat-w">({weight:.3f})</span>'
         )
 
-    short_names = [IDIOM_SHORT.get(c, c) for c in classes]
+    short_names = [LABEL_SHORT.get(c, c) for c in classes]
     header = "<tr><th>#</th>" + "".join(f"<th>{escape(s)}</th>" for s in short_names) + "</tr>"
     rows = []
     for rank in range(n):
@@ -224,13 +231,13 @@ code { font-family: monospace; background: #f4f4f4; padding: 1px 3px; border-rad
 """
 
 
-def build_summary_table(results: dict, model_names: list[str]) -> str:
+def build_summary_table(results: dict, model_names: list[str], test_sets: dict) -> str:
     """Comparison table: rows = test set × metric, cols = models. Best/worst highlighted."""
     col_header = "".join(f"<th>{escape(m)}</th>" for m in model_names)
     header = f"<thead><tr><th>Test set</th><th>Metric</th>{col_header}</tr></thead>"
 
     rows = []
-    for i, (tkey, (tlabel, _)) in enumerate(TEST_SETS.items()):
+    for i, (tkey, (tlabel, _)) in enumerate(test_sets.items()):
         for metric_key, metric_label in [("acc", "Accuracy"), ("f1", "Macro F1")]:
             values = {}
             for mname in model_names:
@@ -270,13 +277,13 @@ def build_summary_table(results: dict, model_names: list[str]) -> str:
     )
 
 
-def build_html(results: dict, top_features_html: dict) -> str:
+def build_html(results: dict, top_features_html: dict, test_sets: dict) -> str:
     """results: {test_key: {model_name: {acc, f1, table_html, cm_b64, n_samples, classes}}}"""
     body_parts = [f"<style>{CSS}</style>", "<h1>Romansh Idiom Classifier — Evaluation Report</h1>"]
 
     model_names = list(MODELS.keys())
     body_parts.append("<h2>Summary</h2>")
-    body_parts.append(build_summary_table(results, model_names))
+    body_parts.append(build_summary_table(results, model_names, test_sets))
 
     # Top features per class (one section per model, independent of test sets)
     body_parts.append("<h2>Top 10 Features per Class</h2>")
@@ -287,7 +294,7 @@ def build_html(results: dict, top_features_html: dict) -> str:
         body_parts.append(top_features_html[mname])
 
     # Per-test-set sections
-    for tkey, (tlabel, _) in TEST_SETS.items():
+    for tkey, (tlabel, _) in test_sets.items():
         if tkey not in results:
             body_parts.append(f"<h2>{escape(tlabel)}</h2><p class='skipped'>Skipped (empty or missing).</p>")
             continue
@@ -312,6 +319,15 @@ def main():
     EVAL_DIR.mkdir(parents=True, exist_ok=True)
     start_run("step7_evaluate", artifacts=[REPORT_PATH])
 
+    meta = load_splits_meta()
+    all_labels = meta["languages"]
+    mode = "multilingual" if meta["multilingual"] else "Romansh-only"
+    print(f"Mode: {mode} ({len(all_labels)} classes: {', '.join(all_labels)})")
+
+    test_sets = dict(BASE_TEST_SETS)
+    if meta["multilingual"]:
+        test_sets.update(MULTILINGUAL_TEST_SETS)
+
     # Load models
     loaded_models = {}
     for mname, mpath in MODELS.items():
@@ -327,7 +343,7 @@ def main():
 
     results = {}
 
-    for tkey, (tlabel, tpath) in TEST_SETS.items():
+    for tkey, (tlabel, tpath) in test_sets.items():
         print(f"\n{'='*60}")
         print(f"Test set: {tlabel}")
         texts, labels = load_split(tpath)
@@ -335,11 +351,11 @@ def main():
             print(f"  Empty or missing — skipping.")
             continue
 
-        classes = [c for c in IDIOMS if c in set(labels)]
+        classes = [c for c in all_labels if c in set(labels)]
         dist = Counter(labels)
-        print(f"  {len(texts):,} samples across {len(classes)} idioms:")
+        print(f"  {len(texts):,} samples across {len(classes)} classes:")
         for cls in classes:
-            short = IDIOM_SHORT.get(cls, cls)
+            short = LABEL_SHORT.get(cls, cls)
             print(f"    {short:<10} {dist[cls]:>5,}")
         results[tkey] = {}
 
@@ -355,7 +371,7 @@ def main():
             f1_per = f1_score(labels, preds, average=None, labels=classes, zero_division=0)
             for cls, score in zip(classes, f1_per):
                 bar = "█" * int(score * 20)
-                print(f"    {IDIOM_SHORT.get(cls, cls):<10} {score:.3f}  {bar}")
+                print(f"    {LABEL_SHORT.get(cls, cls):<10} {score:.3f}  {bar}")
 
             cm_b64 = plot_confusion_matrix(labels, preds, classes)
             table_html = per_class_table(labels, preds, classes)
@@ -396,7 +412,7 @@ def main():
                     "macro_f1":  round(results[tkey][mname]["f1"], 6),
                     "per_class": results[tkey][mname]["per_class"],
                 }
-                for tkey, (tlabel, _) in TEST_SETS.items()
+                for tkey, (tlabel, _) in test_sets.items()
                 if tkey in results and mname in results[tkey]
             },
         }
@@ -410,7 +426,7 @@ def main():
         top_features_html[mname] = top_features_table(model)
         print(f"  [{mname}] done")
 
-    html = build_html(results, top_features_html)
+    html = build_html(results, top_features_html, test_sets)
     REPORT_PATH.write_text(html, encoding="utf-8")
     print(f"\nReport saved → {REPORT_PATH}")
 

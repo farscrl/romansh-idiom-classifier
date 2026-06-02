@@ -1,10 +1,10 @@
 """
 Step 1: Load all data sources, clean and normalize text, write to data/02_preprocessed/.
 
-One subfolder per source, one file per idiom within each subfolder.
-Each file contains one text per line (no label — idiom is implicit in the filename).
+One subfolder per source, one file per label within each subfolder.
+Each file contains one text per line (no label — label is implicit in the filename).
 
-Output:
+Output (Romansh sources — files named rm-{idiom}.tsv):
   data/02_preprocessed/fmr/rm-{idiom}.tsv
   data/02_preprocessed/pledari-grond/rm-{idiom}.tsv
   data/02_preprocessed/rtr-transcripts/rm-{idiom}.tsv
@@ -12,6 +12,18 @@ Output:
   data/02_preprocessed/theater-plays/rm-{idiom}.tsv
   data/02_preprocessed/canton-laws/rm-{idiom}.tsv
   data/02_preprocessed/proprietary-data/rm-{idiom}.tsv
+
+Output (Wikipedia — files named {lang}.tsv, no umlaut filter, not cross-source deduped):
+  data/02_preprocessed/wikipedia/de.tsv
+  data/02_preprocessed/wikipedia/fr.tsv
+  data/02_preprocessed/wikipedia/it.tsv
+  data/02_preprocessed/wikipedia/en.tsv
+
+Post-processing applied to Romansh sources only:
+  - Umlaut sentence filtering (only rm-*.tsv files are processed)
+  - Cross-source deduplication (Wikipedia is outside the dedup priority list)
+
+Within-source deduplication is applied to all sources including Wikipedia.
 """
 
 import re
@@ -28,6 +40,8 @@ from src.preprocessing import (
     load_theater_plays,
     load_canton_laws,
     load_proprietary,
+    load_wikipedia,
+    WIKIPEDIA_LANGS,
 )
 
 PREPROCESSED_DIR = Path("data/02_preprocessed")
@@ -366,6 +380,12 @@ def main():
 
     print("\nPreprocessing Proprietary data...")
     save_by_idiom(load_proprietary(), PREPROCESSED_DIR / "proprietary-data")
+
+    print("\nPreprocessing Wikipedia (de/fr/it/en)...")
+    wiki_samples: list[tuple[str, str]] = []
+    for lang in WIKIPEDIA_LANGS:
+        wiki_samples.extend(load_wikipedia(lang))
+    save_by_idiom(wiki_samples, PREPROCESSED_DIR / "wikipedia")
 
     filter_umlaut_sentences()
     cross_source_dedup()

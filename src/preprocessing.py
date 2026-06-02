@@ -19,6 +19,8 @@ TEXTBOOKS_DIR = Path("data/01_raw/textbooks")
 THEATER_PLAYS_DIR = Path("data/01_raw/theater-plays")
 CANTON_LAWS_DIR = Path("data/01_raw/canton-laws")
 PROPRIETARY_DIR = Path("data/01_raw/proprietary-data")
+WIKIPEDIA_DIR = Path("data/01_raw/wikipedia")
+WIKIPEDIA_LANGS = ["de", "fr", "it", "en"]
 
 PLEDARI_GROND_FILES = {
     "pledarigrond_export_json_sursilvan.json": "rm-sursilv",
@@ -263,6 +265,23 @@ def load_canton_laws() -> list[tuple[str, str]]:
             if is_valid(text):
                 samples.append(("rm-rumgr", text))
     print(f"  [Canton Laws] Loaded {len(samples)} samples.")
+    return samples
+
+
+def load_wikipedia(lang: str) -> list[tuple[str, str]]:
+    """Load preprocessed Wikipedia paragraphs for one language from data/01_raw/wikipedia/{lang}/data.jsonl."""
+    path = WIKIPEDIA_DIR / lang / "data.jsonl"
+    if not path.exists():
+        print(f"  [Wikipedia/{lang}] data.jsonl not found, skipping.")
+        return []
+    samples = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            row = json.loads(line)
+            text = normalize(row.get("text", ""))
+            if is_valid(text):
+                samples.append((lang, text))
+    print(f"  [Wikipedia/{lang}] Loaded {len(samples):,} samples.")
     return samples
 
 

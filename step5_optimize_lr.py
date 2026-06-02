@@ -26,6 +26,7 @@ from sklearn.model_selection import ParameterSampler, StratifiedKFold, cross_val
 from sklearn.pipeline import FeatureUnion, Pipeline
 
 from src.run_log import start_run
+from src.splits import load_splits_meta
 
 SPLITS_DIR = Path("data/03_splits")
 MODELS_DIR = Path("models")
@@ -51,6 +52,10 @@ def load_split(path: Path) -> tuple[list[str], list[str]]:
 def main():
     MODELS_DIR.mkdir(exist_ok=True)
     start_run("step5_optimize_lr", artifacts=[PARAMS_PATH])
+
+    meta = load_splits_meta()
+    mode = "multilingual" if meta["multilingual"] else "Romansh-only"
+    print(f"Mode: {mode} ({len(meta['languages'])} classes: {', '.join(meta['languages'])})")
 
     print("Loading training set...")
     train_texts, train_labels = load_split(SPLITS_DIR / "train/train.tsv")

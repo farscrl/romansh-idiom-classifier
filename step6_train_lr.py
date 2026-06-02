@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 from src.run_log import start_run
 from src.model_export import export_pipeline
+from src.splits import load_splits_meta
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -46,6 +47,10 @@ def main():
     MODELS_DIR.mkdir(exist_ok=True)
     start_run("step6_train_lr", artifacts=[MODEL_PATH, MODEL_PATH_LITE])
 
+    meta = load_splits_meta()
+    mode = "multilingual" if meta["multilingual"] else "Romansh-only"
+    print(f"Mode: {mode} ({len(meta['languages'])} classes: {', '.join(meta['languages'])})")
+
     if not PARAMS_PATH.exists():
         raise FileNotFoundError(f"{PARAMS_PATH} not found — run step5_optimize_lr.py first.")
 
@@ -75,13 +80,6 @@ def main():
         max_features=params["features__word__max_features"] or None,
         min_df=params["features__word__min_df"],
     )
-    # Map old params format (clf__penalty) to new sklearn 1.8 API (l1_ratio only).
-    # New format uses l1_ratio directly: 0.0=L2, 1.0=L1, in between=elasticnet.
-    if "clf__penalty" in params:
-        _penalty_to_l1_ratio = {"l2": 0.0, "l1": 1.0, "elasticnet": params.get("clf__l1_ratio", 0.5)}
-        l1_ratio = _penalty_to_l1_ratio[params["clf__penalty"]]
-    else:
-        l1_ratio = params["clf__l1_ratio"]
     clf = LogisticRegression(
         C=params["clf__C"],
         solver="lbfgs",
