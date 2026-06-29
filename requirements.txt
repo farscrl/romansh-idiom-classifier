@@ -7,3 +7,6 @@ matplotlib
 # Model training and evaluation
 scikit-learn
 scipy
+
+# Hunspell-based language detection (compare/models/hunspell)
+spylls
