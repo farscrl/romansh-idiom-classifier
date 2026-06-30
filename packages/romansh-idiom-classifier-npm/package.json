@@ -1,7 +1,7 @@
 {
   "name": "@farscrl/romansh-idiom-classifier",
   "version": "1.0.0",
-  "description": "Browser-side Romansh idiom classifier (Sursilvan, Sutsilvan, Surmiran, Puter, Vallader, Rumantsch Grischun)",
+  "description": "Browser-side Romansh idiom classifier — Sursilvan, Sutsilvan, Surmiran, Puter, Vallader, Rumantsch Grischun, German, French, Italian, English",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,8 +1,8 @@
 # @farscrl/romansh-idiom-classifier
 
-Browser-side **Romansh idiom classifier**. Given a text in Romansh, it returns which of the six regional idioms it is written in.
+Browser-side **Romansh idiom classifier**. Given a text, it identifies which of the six Romansh idioms it is written in — Sursilvan, Sutsilvan, Surmiran, Puter, Vallader, or Rumantsch Grischun — and also distinguishes German, French, Italian, and English.
 
-| Label | Idiom |
+| Label | Language |
 |---|---|
 | `rm-sursilv` | Sursilvan |
 | `rm-sutsilv` | Sutsilvan |
@@ -10,6 +10,10 @@ Browser-side **Romansh idiom classifier**. Given a text in Romansh, it returns w
 | `rm-puter` | Puter |
 | `rm-vallader` | Vallader |
 | `rm-rumgr` | Rumantsch Grischun |
+| `de` | German |
+| `fr` | French |
+| `it` | Italian |
+| `en` | English |
 
 The classifier runs entirely in the browser — no server required. It is a pure TypeScript reimplementation of the linear TF-IDF + SVM/LR pipeline trained in [farscrl/romansh-idiom-identification](https://github.com/farscrl/romansh-idiom-identification).
 

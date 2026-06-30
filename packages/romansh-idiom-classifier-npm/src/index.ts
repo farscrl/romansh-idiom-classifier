@@ -11,7 +11,7 @@ export class RomanshIdiomClassifier {
 
   /**
    * Predict the Romansh idiom of the given text.
-   * Returns one of: rm-sursilv, rm-sutsilv, rm-surmiran, rm-puter, rm-vallader, rm-rumgr
+   * Returns one of: rm-sursilv, rm-sutsilv, rm-surmiran, rm-puter, rm-vallader, rm-rumgr, de, fr, it, en
    */
   predict(text: string): string {
     const scores = this.score(text);

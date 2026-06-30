@@ -27,7 +27,7 @@ def _load_bundled(name: str) -> dict:
 class RomanshIdiomClassifier:
     """
     Romansh idiom classifier. Predicts one of: rm-sursilv, rm-sutsilv, rm-surmiran,
-    rm-puter, rm-vallader, rm-rumgr.
+    rm-puter, rm-vallader, rm-rumgr, de, fr, it, en.
 
     Args:
         model: Which model to use. One of:

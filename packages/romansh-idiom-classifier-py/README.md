@@ -1,8 +1,8 @@
 # romansh-idiom-classifier
 
-Python **Romansh idiom classifier**. Given a text in Romansh, it returns which of the six regional idioms it is written in.
+Python **Romansh idiom classifier**. Given a text, it identifies which of the six Romansh idioms it is written in — Sursilvan, Sutsilvan, Surmiran, Puter, Vallader, or Rumantsch Grischun — and also distinguishes German, French, Italian, and English.
 
-| Label | Idiom |
+| Label | Language |
 |---|---|
 | `rm-sursilv` | Sursilvan |
 | `rm-sutsilv` | Sutsilvan |
@@ -10,6 +10,10 @@ Python **Romansh idiom classifier**. Given a text in Romansh, it returns which o
 | `rm-puter` | Puter |
 | `rm-vallader` | Vallader |
 | `rm-rumgr` | Rumantsch Grischun |
+| `de` | German |
+| `fr` | French |
+| `it` | Italian |
+| `en` | English |
 
 Pure Python inference — no scikit-learn required at runtime. All four trained models are bundled. Trained in [farscrl/romansh-idiom-identification](https://github.com/farscrl/romansh-idiom-identification).
 
@@ -41,12 +45,12 @@ classifier = RomanshIdiomClassifier(model="svm-lite")  # smallest and fastest
 
 | Model | Avg accuracy | Avg macro-F1 | JSON size |
 |---|---|---|---|
-| `lr` (default) | 0.952 | **0.937** | 28 MB |
-| `svm` | 0.952 | 0.928 | 11 MB |
-| `lr-lite` | 0.946 | 0.933 | 2.6 MB |
-| `svm-lite` | 0.947 | 0.924 | 1.8 MB |
+| `lr` (default) | 0.948 | **0.937** | 75 MB |
+| `svm` | 0.949 | 0.939 | 14 MB |
+| `lr-lite` | 0.943 | 0.930 | 4.0 MB |
+| `svm-lite` | 0.944 | 0.930 | 2.1 MB |
 
-All four models are bundled (~43 MB total, ~15 MB gzipped).
+Accuracy averaged over test sets A–D (Romansh idioms). All four models are bundled (~95 MB total).
 
 ### With raw scores
 
