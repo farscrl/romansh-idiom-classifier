@@ -1,51 +1,51 @@
 {
   "model": "svm_lite",
   "source": "typescript",
-  "timestamp": "2026-05-27T11:00:02Z",
+  "timestamp": "2026-06-30T12:49:58Z",
   "test_sets": {
     "test_a": {
       "label": "Test A — news (FMR)",
       "n_samples": 2616,
       "accuracy": 0.983563,
-      "macro_f1": 0.973913,
+      "macro_f1": 0.974186,
       "per_class": {
         "rm-puter": {
           "f1": 0.971609
         },
         "rm-rumgr": {
-          "f1": 0.971372
+          "f1": 0.972332
         },
         "rm-surmiran": {
           "f1": 0.985692
         },
         "rm-sursilv": {
-          "f1": 0.994624
+          "f1": 0.994173
         },
         "rm-sutsilv": {
           "f1": 0.941176
         },
         "rm-vallader": {
-          "f1": 0.979006
+          "f1": 0.980132
         }
       }
     },
     "test_b": {
       "label": "Test B — speech transcripts (RTR)",
       "n_samples": 1200,
-      "accuracy": 0.979167,
-      "macro_f1": 0.979107,
+      "accuracy": 0.98,
+      "macro_f1": 0.979961,
       "per_class": {
         "rm-puter": {
-          "f1": 0.966921
+          "f1": 0.969388
         },
         "rm-rumgr": {
-          "f1": 0.9801
+          "f1": 0.975248
         },
         "rm-surmiran": {
-          "f1": 0.977215
+          "f1": 0.982278
         },
         "rm-sursilv": {
-          "f1": 0.987654
+          "f1": 0.990099
         },
         "rm-sutsilv": {
           "f1": 0.99005
@@ -58,46 +58,46 @@
     "test_c": {
       "label": "Test C — schoolbooks (Textbooks)",
       "n_samples": 49690,
-      "accuracy": 0.904287,
-      "macro_f1": 0.915381,
+      "accuracy": 0.900322,
+      "macro_f1": 0.912802,
       "per_class": {
         "rm-puter": {
-          "f1": 0.926292
+          "f1": 0.926565
         },
         "rm-surmiran": {
-          "f1": 0.866483
+          "f1": 0.862503
         },
         "rm-sursilv": {
-          "f1": 0.921328
+          "f1": 0.916663
         },
         "rm-sutsilv": {
-          "f1": 0.947893
+          "f1": 0.946777
         },
         "rm-vallader": {
-          "f1": 0.914907
+          "f1": 0.911503
         }
       }
     },
     "test_d": {
       "label": "Test D — proprietary (out-of-domain)",
       "n_samples": 9568,
-      "accuracy": 0.918896,
-      "macro_f1": 0.818146,
+      "accuracy": 0.910744,
+      "macro_f1": 0.845913,
       "per_class": {
         "rm-puter": {
-          "f1": 0.753862
+          "f1": 0.75
         },
         "rm-surmiran": {
-          "f1": 0.955073
+          "f1": 0.963244
         },
         "rm-sursilv": {
-          "f1": 0.958351
+          "f1": 0.955283
         },
         "rm-sutsilv": {
-          "f1": 0.558824
+          "f1": 0.716981
         },
         "rm-vallader": {
-          "f1": 0.86462
+          "f1": 0.844056
         }
       }
     }

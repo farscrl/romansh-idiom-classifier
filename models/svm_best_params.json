@@ -1,7 +1,7 @@
 {
-  "clf__C": 1.0159953297230413,
-  "features__char__max_features": 100000,
-  "features__char__min_df": 2,
+  "clf__C": 0.9541317262551529,
+  "features__char__max_features": 200000,
+  "features__char__min_df": 1,
   "features__char__ngram_range": [
     1,
     5
@@ -10,6 +10,6 @@
   "features__word__min_df": 1,
   "features__word__ngram_range": [
     1,
-    2
+    1
   ]
 }
