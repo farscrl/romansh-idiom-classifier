@@ -6,8 +6,22 @@ import type { ModelData } from "./types.js";
 export type { ModelData, VectorizerData, SparseRow } from "./types.js";
 
 export class RomanshIdiomClassifier {
+  private readonly _charCoef: Map<number, number>[];
+  private readonly _wordCoef: Map<number, number>[];
+
   /** Without arguments, uses the bundled LR-lite model. Pass a parsed model object to use a custom model. */
-  constructor(private readonly model: ModelData = MODEL_DATA) {}
+  constructor(private readonly model: ModelData = MODEL_DATA) {
+    this._charCoef = model.char_coef.map(({ idx, val }) => {
+      const m = new Map<number, number>();
+      for (let i = 0; i < idx.length; i++) m.set(idx[i], val[i]);
+      return m;
+    });
+    this._wordCoef = model.word_coef.map(({ idx, val }) => {
+      const m = new Map<number, number>();
+      for (let i = 0; i < idx.length; i++) m.set(idx[i], val[i]);
+      return m;
+    });
+  }
 
   /**
    * Predict the Romansh idiom of the given text.
@@ -24,7 +38,7 @@ export class RomanshIdiomClassifier {
    * negative means evidence against. Use the gap between scores to judge confidence.
    */
   score(text: string): Record<string, number> {
-    const { classes, char, word, char_coef, word_coef, intercept } = this.model;
+    const { classes, char, word, intercept } = this.model;
 
     const charF = computeTfidf(
       charWbNgrams(text, char.ngram_range[0], char.ngram_range[1]),
@@ -40,16 +54,16 @@ export class RomanshIdiomClassifier {
     const result: Record<string, number> = {};
     for (let c = 0; c < classes.length; c++) {
       let s = intercept[c];
-      const { idx: ci, val: cv } = char_coef[c];
-      for (let j = 0; j < ci.length; j++) {
-        const w = charF.get(ci[j]);
-        if (w !== undefined) s += w * cv[j];
-      }
-      const { idx: wi, val: wv } = word_coef[c];
-      for (let j = 0; j < wi.length; j++) {
-        const w = wordF.get(wi[j]);
-        if (w !== undefined) s += w * wv[j];
-      }
+      const charCoef = this._charCoef[c];
+      charF.forEach((w, idx) => {
+        const val = charCoef.get(idx);
+        if (val !== undefined) s += w * val;
+      });
+      const wordCoef = this._wordCoef[c];
+      wordF.forEach((w, idx) => {
+        const val = wordCoef.get(idx);
+        if (val !== undefined) s += w * val;
+      });
       result[classes[c]] = s;
     }
     return result;

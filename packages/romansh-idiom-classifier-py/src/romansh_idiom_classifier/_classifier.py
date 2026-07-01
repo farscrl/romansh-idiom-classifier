@@ -54,8 +54,14 @@ class RomanshIdiomClassifier:
         self._classes: list[str] = data["classes"]
         self._char = data["char"]
         self._word = data["word"]
-        self._char_coef: list[dict] = data["char_coef"]
-        self._word_coef: list[dict] = data["word_coef"]
+        self._char_coef: list[dict[int, float]] = [
+            {idx: val for idx, val in zip(row["idx"], row["val"])}
+            for row in data["char_coef"]
+        ]
+        self._word_coef: list[dict[int, float]] = [
+            {idx: val for idx, val in zip(row["idx"], row["val"])}
+            for row in data["word_coef"]
+        ]
         self._intercept: list[float] = data["intercept"]
 
     def predict(self, text: str) -> str:
@@ -86,13 +92,15 @@ class RomanshIdiomClassifier:
         result: dict[str, float] = {}
         for c, cls in enumerate(self._classes):
             s = self._intercept[c]
-            for idx, val in zip(self._char_coef[c]["idx"], self._char_coef[c]["val"]):
-                w = char_f.get(idx)
-                if w is not None:
+            char_coef = self._char_coef[c]
+            for idx, w in char_f.items():
+                val = char_coef.get(idx)
+                if val is not None:
                     s += w * val
-            for idx, val in zip(self._word_coef[c]["idx"], self._word_coef[c]["val"]):
-                w = word_f.get(idx)
-                if w is not None:
+            word_coef = self._word_coef[c]
+            for idx, w in word_f.items():
+                val = word_coef.get(idx)
+                if val is not None:
                     s += w * val
             result[cls] = s
         return result

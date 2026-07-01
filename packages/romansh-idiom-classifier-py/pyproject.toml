@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "romansh-idiom-classifier"
-version = "1.0.1"
+version = "1.0.2"
 description = "Romansh idiom classifier — Sursilvan, Sutsilvan, Surmiran, Puter, Vallader, Rumantsch Grischun, German, French, Italian, English"
 readme = "README.md"
 license = "MIT"
