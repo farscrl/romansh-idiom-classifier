@@ -111,6 +111,10 @@
     "rm-puter":    "Puter",
     "rm-vallader": "Vallader",
     "rm-rumgr":    "Rumantsch Grischun",
+    "de":          "Deutsch",
+    "fr":          "Français",
+    "it":          "Italiano",
+    "en":          "English",
   };
 
   const inputEl  = document.getElementById("input");
@@ -123,7 +127,7 @@
     }
     const probs   = classifier.softScores(text);
     const winner  = Object.entries(probs).sort(([, a], [, b]) => b - a)[0][0];
-    const ordered = Object.keys(IDIOM_NAMES);
+    const ordered = Object.keys(probs).sort((a, b) => probs[b] - probs[a]);
 
     const bars = ordered.map(key => {
       const pct   = (probs[key] * 100).toFixed(1);
